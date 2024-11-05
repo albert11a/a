@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selfie Vorschau</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+        }
+        #photoContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #capturedPhoto {
+            width: 350px;
+            height: 350px;
+            border-radius: 15px;
+            border: 4px solid white;
+            object-fit: cover;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="photoContainer">
+        <img id="capturedPhoto" alt="Aufgenommenes Foto">
+        <button onclick="goBack()">Zurück zur Aufnahme</button>
+    </div>
+
+    <script>
+        // Funktion zum Laden und Anzeigen des aufgenommenen Fotos
+        window.onload = function() {
+            const capturedImage = localStorage.getItem('capturedImage');
+            if (capturedImage) {
+                document.getElementById('capturedPhoto').src = capturedImage;
+            } else {
+                alert("Kein Foto verfügbar.");
+            }
+        };
+
+        // Funktion zum Zurückkehren zur vorherigen Seite
+        function goBack() {
+            window.location.href = 'index.html';  // Ändere dies zu deiner entsprechenden Startseite
+        }
+    </script>
+</body>
+</html>
