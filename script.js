@@ -283,3 +283,64 @@ function preventTouch(event) {
 function preventGesture(event) {
     event.preventDefault();  // Verhindert Gesten wie Zoom
 }
+// Funktion zur Erkennung von In-App-Browsern wie Instagram
+function isInAppBrowser() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /Instagram|FBAV|FBAN|Twitter/i.test(userAgent);
+}
+
+// Funktion zum Öffnen der Seite im Standardbrowser des Geräts
+function openInBrowser() {
+    const url = window.location.href; // aktuelle URL der Seite
+    window.open(url, '_blank'); // öffnet die Seite in einem neuen Tab/Standardbrowser
+}
+
+// Funktion, die prüft, ob der Button angezeigt werden soll
+function checkBrowserCompatibility() {
+    if (isInAppBrowser()) {
+        document.getElementById("openInBrowserContainer").style.display = "block";
+    }
+}
+
+// Ruft die Browser-Kompatibilitätsprüfung beim Laden der Seite auf
+window.onload = function() {
+    checkBrowserCompatibility();
+    startQuestionnaire(); // Startet den Fragebogen
+};
+
+// Funktion zur Erkennung von In-App-Browsern wie Instagram und Facebook
+function isInAppBrowser() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /Instagram|FBAV|FBAN|Twitter/i.test(userAgent);
+}
+
+// Funktion zum Öffnen der Seite im Standardbrowser des Geräts
+function openInBrowser() {
+    const url = window.location.href; // aktuelle URL der Seite
+    window.open(url, '_blank'); // öffnet die Seite in einem neuen Tab/Standardbrowser
+}
+
+// Funktion, die prüft, ob der Button angezeigt werden soll
+function checkBrowserCompatibility() {
+    if (isInAppBrowser()) {
+        // Zeige eine Meldung und den Button an, um die Seite im Standardbrowser zu öffnen
+        document.getElementById("openInBrowserContainer").style.display = "block";
+    } else {
+        // Kamera direkt öffnen, wenn es ein Standardbrowser ist
+        openCamera();
+    }
+}
+
+// Ruft die Browser-Kompatibilitätsprüfung beim Laden der Seite auf
+window.onload = function() {
+    checkBrowserCompatibility();
+    startQuestionnaire(); // Startet den Fragebogen
+};
+
+// HTML für den "Im Browser öffnen"-Button
+/*
+<div id="openInBrowserContainer" style="display: none;">
+    <p>Um die Kamera zu nutzen, öffnen Sie diese Seite bitte im Standardbrowser Ihres Geräts.</p>
+    <button onclick="openInBrowser()">Im Browser öffnen</button>
+</div>
+*/
