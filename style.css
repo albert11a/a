@@ -101,6 +101,7 @@ button {
     color: #555;
     line-height: 1.6;
 }
+
 /* Antwort-Box */
 .answer-box {
     background-color: #F6F6F7;
@@ -362,23 +363,23 @@ button {
     display: flex;
     justify-content: space-between;
     padding: 10px 20px;
-  }
+}
   
-  .nav-button {
+.nav-button {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
     cursor: pointer;
-  }
-  
-  .left {
+}
+
+.left {
     align-self: flex-start;
-  }
-  
-  .right {
+}
+
+.right {
     align-self: flex-end;
-  }
-  /* Navigations-Buttons */
+} 
+/* Navigations-Buttons */
 .nav-buttons {
     display: flex;
     justify-content: space-between;
@@ -392,4 +393,29 @@ button {
 
 .nav-button.right {
     align-self: flex-end;
+} 
+
+/* Vazhdo-Button Styles */
+.vazhdo-button.disabled {
+    opacity: 0.5; /* Macht den Button blasser */
+    cursor: not-allowed; /* Ändert den Cursor, um zu zeigen, dass der Button nicht aktiv ist */
+}
+
+.vazhdo-button {
+    transition: opacity 0.3s; /* Für sanfte Übergänge */
+}
+
+/* Back-Button Styles */
+.left.disabled {
+    opacity: 0.5; /* Macht den Button blasser */
+    cursor: not-allowed; /* Ändert den Cursor, um zu zeigen, dass der Button nicht aktiv ist */
+}
+
+.left {
+    transition: opacity 0.3s; /* Für sanfte Übergänge */
+}
+
+/* Spaced Buttons für Fragen 3, 4 und 5 */
+.spaced-buttons {
+    margin-top: 60px; /* Anpassen nach Bedarf */
 }
