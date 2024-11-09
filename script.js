@@ -44,15 +44,14 @@ function toggleSelection(element) {
     setVazhdoButtonState(questionNumber);
 }
 
-// Funktion zum Setzen des Zustands des "Vazhdo"-Buttons
+// Funktion zum Setzen des Zustands des "Vazhdo"-Buttons und "Back"-Buttons
 function setVazhdoButtonState(questionNumber) {
     const navButtons = document.getElementById(`nav-buttons${questionNumber}`);
     if (!navButtons) return;
 
-    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // Annahme: Der Button hat die Klasse 'vazhdo-button'
-    if (!vazhdoButton) return;
+    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // "Vazhdo"-Button
+    const backButton = navButtons.querySelector('.left'); // "Mbrapa"-Button
 
-    // Überprüfe, ob die aktuelle Frage eine Auswahl erfordert
     if (selectionRequiredQuestions.includes(questionNumber)) {
         // Überprüfe, ob es ausgewählte Antworten gibt
         const selected = userResponses[`question${questionNumber}`] && userResponses[`question${questionNumber}`].length > 0;
@@ -65,6 +64,13 @@ function setVazhdoButtonState(questionNumber) {
     } else {
         // Fragen ab "sensetiv" erfordern keine Auswahl
         vazhdoButton.classList.remove('disabled');
+    }
+
+    // Spezielle Behandlung für die erste Frage: "Mbrapa"-Button immer deaktiviert
+    if (questionNumber === 1) {
+        backButton.classList.add('disabled');
+    } else {
+        backButton.classList.remove('disabled');
     }
 }
 
