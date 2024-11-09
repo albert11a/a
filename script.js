@@ -1,12 +1,19 @@
 // Objekt zur Speicherung der Benutzerantworten
 const userResponses = {};
 
+// Liste der Fragen, die eine Auswahl erfordern (z.B. Frage 1 und 2)
+const selectionRequiredQuestions = [1, 2];
+
 // Funktion zum Starten des Fragebogens 
 function startQuestionnaire() {
     // Direkt mit der ersten Frage starten
     document.getElementById("question-container").style.display = "block";
     document.getElementById("question1").style.display = "block";
     document.getElementById("answers1").style.display = "block";
+    document.getElementById("nav-buttons1").style.display = "flex";
+    
+    // Setze den Zustand des "Vazhdo"-Buttons für die erste Frage
+    setVazhdoButtonState(1);
 }
 
 // Starten des Fragebogens beim Laden der Seite
@@ -14,28 +21,15 @@ window.onload = startQuestionnaire;
 
 // Funktion zum Umschalten der Auswahl von Antwortboxen
 function toggleSelection(element) {
-    // Nur für Fragen 1 und 2 anwenden
+    // Nur für Fragen, die eine Auswahl erfordern
     const questionId = element.parentElement.id;
-    if (questionId !== 'answers1' && questionId !== 'answers2') return;
+    const questionNumber = parseInt(questionId.replace('answers', ''));
+    if (!selectionRequiredQuestions.includes(questionNumber)) return;
 
     element.classList.toggle('selected');
 
-    // Prüfen, ob mindestens eine Antwort ausgewählt wurde
-    const selectedAnswers = element.parentElement.querySelectorAll('.answer-box.selected');
-
-    // Bestimme die entsprechende continue-box ID
-    const questionNumber = questionId.replace('answers', '');
-    const continueBox = document.getElementById(`continue${questionNumber}`);
-
-    if (selectedAnswers.length > 0) {
-        // Hinweis und Vazhdo-Button anzeigen
-        continueBox.style.display = 'block';
-    } else {
-        // Hinweis und Vazhdo-Button ausblenden
-        continueBox.style.display = 'none';
-    }
-
     // Speichern der ausgewählten Antworten
+    const selectedAnswers = element.parentElement.querySelectorAll('.answer-box.selected');
     const selectedTexts = Array.from(selectedAnswers).map(box => {
         const heading = box.querySelector('.answer-heading');
         if (heading) {
@@ -45,40 +39,109 @@ function toggleSelection(element) {
         }
     });
     userResponses[`question${questionNumber}`] = selectedTexts;
+
+    // Aktualisiere den Zustand des "Vazhdo"-Buttons
+    setVazhdoButtonState(questionNumber);
+}
+
+// Funktion zum Setzen des Zustands des "Vazhdo"-Buttons
+function setVazhdoButtonState(questionNumber) {
+    const navButtons = document.getElementById(`nav-buttons${questionNumber}`);
+    if (!navButtons) return;
+
+    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // Annahme: Der Button hat die Klasse 'vazhdo-button'
+    if (!vazhdoButton) return;
+
+    // Überprüfe, ob die aktuelle Frage eine Auswahl erfordert
+    if (selectionRequiredQuestions.includes(questionNumber)) {
+        // Überprüfe, ob es ausgewählte Antworten gibt
+        const selected = userResponses[`question${questionNumber}`] && userResponses[`question${questionNumber}`].length > 0;
+
+        if (selected) {
+            vazhdoButton.classList.remove('disabled');
+        } else {
+            vazhdoButton.classList.add('disabled');
+        }
+    } else {
+        // Fragen ab "sensetiv" erfordern keine Auswahl
+        vazhdoButton.classList.remove('disabled');
+    }
 }
 
 // Funktion zum Anzeigen der nächsten Frage
 function nextQuestion(nextQuestionNumber) {
-    // Versteckt die aktuelle Frage, Antworten und continue-box
-    const currentQuestion = document.getElementById(`question${nextQuestionNumber - 1}`);
-    const currentAnswers = document.getElementById(`answers${nextQuestionNumber - 1}`);
-    const currentContinue = document.getElementById(`continue${nextQuestionNumber - 1}`);
+    // Bestimme die aktuelle Frage basierend auf der nächsten Fragenummer
+    const currentQuestionNumber = nextQuestionNumber - 1;
+    const currentSelections = userResponses[`question${currentQuestionNumber}`];
+
+    // Überprüfe, ob die aktuelle Frage eine Auswahl erfordert
+    if (selectionRequiredQuestions.includes(currentQuestionNumber)) {
+        // Überprüfe, ob für die aktuelle Frage eine Auswahl getroffen wurde
+        if (!currentSelections || currentSelections.length === 0) {
+            alert('Ju lutem zgjidhni një përgjigje para se të vazhdoni.');
+            return;
+        }
+    }
+
+    // Versteckt die aktuelle Frage, Antworten und Nav-Buttons
+    const currentQuestion = document.getElementById(`question${currentQuestionNumber}`);
+    const currentAnswers = document.getElementById(`answers${currentQuestionNumber}`);
+    const currentNavButtons = document.getElementById(`nav-buttons${currentQuestionNumber}`);
 
     if (currentQuestion) currentQuestion.style.display = "none";
     if (currentAnswers) currentAnswers.style.display = "none";
-    if (currentContinue) currentContinue.style.display = "none";
+    if (currentNavButtons) currentNavButtons.style.display = "none";
 
     // Zeige die nächste Frage und Antworten an
-    const nextQuestion = document.getElementById(`question${nextQuestionNumber}`);
+    const nextQuestionElement = document.getElementById(`question${nextQuestionNumber}`);
     const nextAnswers = document.getElementById(`answers${nextQuestionNumber}`);
-    const nextContinue = document.getElementById(`continue${nextQuestionNumber}`);
+    const nextNavButtons = document.getElementById(`nav-buttons${nextQuestionNumber}`);
 
-    if (nextQuestion) nextQuestion.style.display = "block";
+    if (nextQuestionElement) nextQuestionElement.style.display = "block";
     if (nextAnswers) nextAnswers.style.display = "block";
+    if (nextNavButtons) nextNavButtons.style.display = "flex";
 
-    // Überprüfen, ob die nächste Frage Eingabefelder hat
-    if (nextQuestionNumber === 4 || nextQuestionNumber === 5) {
-        // Für die neuen Fragen 4 und 5 sind die "Vazhdo"-Buttons immer sichtbar
-        if (nextContinue) nextContinue.style.display = 'block';
-    } else {
-        if (nextContinue) nextContinue.style.display = 'none'; // Anfangs ausblenden
-    }
+    // Setze den Zustand des "Vazhdo"-Buttons für die nächste Frage
+    setVazhdoButtonState(nextQuestionNumber);
 
     // Scrollt automatisch nach oben
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Ausgabe zur Fehlerverfolgung in der Konsole
     console.log(`Zur nächsten Frage: ${nextQuestionNumber}`);
+}
+
+// Funktion zum Zurückgehen zur vorherigen Frage
+function navigateBack(previousQuestionNumber) {
+    // Bestimme die aktuelle Frage basierend auf der vorherigen Fragenummer
+    const currentQuestionNumber = previousQuestionNumber + 1;
+
+    // Versteckt die aktuelle Frage, Antworten und Nav-Buttons
+    const currentQuestion = document.getElementById(`question${currentQuestionNumber}`);
+    const currentAnswers = document.getElementById(`answers${currentQuestionNumber}`);
+    const currentNavButtons = document.getElementById(`nav-buttons${currentQuestionNumber}`);
+
+    if (currentQuestion) currentQuestion.style.display = "none";
+    if (currentAnswers) currentAnswers.style.display = "none";
+    if (currentNavButtons) currentNavButtons.style.display = "none";
+
+    // Zeige die vorherige Frage und Antworten an
+    const previousQuestion = document.getElementById(`question${previousQuestionNumber}`);
+    const previousAnswers = document.getElementById(`answers${previousQuestionNumber}`);
+    const previousNavButtons = document.getElementById(`nav-buttons${previousQuestionNumber}`);
+
+    if (previousQuestion) previousQuestion.style.display = "block";
+    if (previousAnswers) previousAnswers.style.display = "block";
+    if (previousNavButtons) previousNavButtons.style.display = "flex";
+
+    // Setze den Zustand des "Vazhdo"-Buttons für die vorherige Frage
+    setVazhdoButtonState(previousQuestionNumber);
+
+    // Scrollt automatisch nach oben
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Ausgabe zur Fehlerverfolgung in der Konsole
+    console.log(`Zur vorherigen Frage: ${previousQuestionNumber}`);
 }
 
 // Funktion zur Aktualisierung des Sensitivitätswerts
@@ -284,3 +347,8 @@ function preventGesture(event) {
     event.preventDefault();  // Verhindert Gesten wie Zoom
 }
 
+// Funktion zur Überprüfung, ob der Browser eine In-App-Browser-Umgebung ist
+function isInAppBrowser() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /Instagram|FBAN|FBAV|Twitter|Snapchat|LinkedIn|Pinterest|TikTok/i.test(userAgent);
+}
