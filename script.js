@@ -1,34 +1,31 @@
-// Objekt zur Speicherung der Benutzerantworten
+// Objekt për ruajtjen e përgjigjeve të përdoruesit
 const userResponses = {};
 
-// Liste der Fragen, die eine Auswahl erfordern (z.B. Frage 1 und 2)
-const selectionRequiredQuestions = [1, 2];
+// Lista e pyetjeve që kërkojnë zgjedhje
+const selectionRequiredQuestions = [2, 3];
 
-// Funktion zum Starten des Fragebogens 
+// Funksioni për të filluar pyetësorin
 function startQuestionnaire() {
-    // Direkt mit der ersten Frage starten
+    // Fillojmë direkt me pyetjen e parë
     document.getElementById("question-container").style.display = "block";
     document.getElementById("question1").style.display = "block";
     document.getElementById("answers1").style.display = "block";
     document.getElementById("nav-buttons1").style.display = "flex";
-    
-    // Setze den Zustand des "Vazhdo"-Buttons für die erste Frage
-    setVazhdoButtonState(1);
 }
 
-// Starten des Fragebogens beim Laden der Seite
+// Fillojmë pyetësorin kur faqja ngarkohet
 window.onload = startQuestionnaire;
 
-// Funktion zum Umschalten der Auswahl von Antwortboxen
+// Funksioni për të ndërruar zgjedhjen e kutive të përgjigjeve
 function toggleSelection(element) {
-    // Nur für Fragen, die eine Auswahl erfordern
+    // Vetëm për pyetjet që kërkojnë zgjedhje
     const questionId = element.parentElement.id;
     const questionNumber = parseInt(questionId.replace('answers', ''));
     if (!selectionRequiredQuestions.includes(questionNumber)) return;
 
     element.classList.toggle('selected');
 
-    // Speichern der ausgewählten Antworten
+    // Ruajtja e përgjigjeve të zgjedhura
     const selectedAnswers = element.parentElement.querySelectorAll('.answer-box.selected');
     const selectedTexts = Array.from(selectedAnswers).map(box => {
         const heading = box.querySelector('.answer-heading');
@@ -40,20 +37,25 @@ function toggleSelection(element) {
     });
     userResponses[`question${questionNumber}`] = selectedTexts;
 
-    // Aktualisiere den Zustand des "Vazhdo"-Buttons
+    // Përditëso gjendjen e butonit "Vazhdo"
     setVazhdoButtonState(questionNumber);
 }
 
-// Funktion zum Setzen des Zustands des "Vazhdo"-Buttons und "Back"-Buttons
+// Funksioni për të vendosur gjendjen e butonave "Vazhdo" dhe "Mbrapa"
 function setVazhdoButtonState(questionNumber) {
     const navButtons = document.getElementById(`nav-buttons${questionNumber}`);
     if (!navButtons) return;
 
-    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // "Vazhdo"-Button
-    const backButton = navButtons.querySelector('.left'); // "Mbrapa"-Button
+    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // Butoni "Vazhdo"
+    const backButton = navButtons.querySelector('.left'); // Butoni "Mbrapa"
+
+    if (questionNumber === 1) {
+        // Për pyetjen 1 nuk ka buton "Vazhdo"
+        return;
+    }
 
     if (selectionRequiredQuestions.includes(questionNumber)) {
-        // Überprüfe, ob es ausgewählte Antworten gibt
+        // Kontrollo nëse ka përgjigje të zgjedhura
         const selected = userResponses[`question${questionNumber}`] && userResponses[`question${questionNumber}`].length > 0;
 
         if (selected) {
@@ -62,34 +64,51 @@ function setVazhdoButtonState(questionNumber) {
             vazhdoButton.classList.add('disabled');
         }
     } else {
-        // Fragen ab "sensetiv" erfordern keine Auswahl
+        // Pyetjet që nuk kërkojnë zgjedhje
         vazhdoButton.classList.remove('disabled');
     }
 
-    // Spezielle Behandlung für die erste Frage: "Mbrapa"-Button immer deaktiviert
-    if (questionNumber === 1) {
-        backButton.classList.add('disabled');
+    // Trajtim special për pyetjen e dytë: butoni "Mbrapa" të jetë i çaktivizuar
+    if (questionNumber === 2) {
+        if (backButton) backButton.classList.add('disabled');
     } else {
-        backButton.classList.remove('disabled');
+        if (backButton) backButton.classList.remove('disabled');
     }
 }
 
-// Funktion zum Anzeigen der nächsten Frage
+// Funksioni për të shfaqur pyetjen tjetër
 function nextQuestion(nextQuestionNumber) {
-    // Bestimme die aktuelle Frage basierend auf der nächsten Fragenummer
     const currentQuestionNumber = nextQuestionNumber - 1;
-    const currentSelections = userResponses[`question${currentQuestionNumber}`];
 
-    // Überprüfe, ob die aktuelle Frage eine Auswahl erfordert
+    // Kontrollo nëse pyetja aktuale kërkon zgjedhje
     if (selectionRequiredQuestions.includes(currentQuestionNumber)) {
-        // Überprüfe, ob für die aktuelle Frage eine Auswahl getroffen wurde
+        const currentSelections = userResponses[`question${currentQuestionNumber}`];
         if (!currentSelections || currentSelections.length === 0) {
             alert('Ju lutem zgjidhni një përgjigje para se të vazhdoni.');
             return;
         }
     }
 
-    // Versteckt die aktuelle Frage, Antworten und Nav-Buttons
+    // Ruajtja e hyrjeve për pyetjet me fusha teksti
+    if (currentQuestionNumber === 5) {
+        const nameInput = document.getElementById('nameInput').value.trim();
+        if (nameInput === '') {
+            alert('Ju lutem vendosni emrin tuaj.');
+            return;
+        }
+        userResponses['name'] = nameInput;
+    }
+
+    if (currentQuestionNumber === 6) {
+        const ageInput = document.getElementById('ageInput').value.trim();
+        if (ageInput === '') {
+            alert('Ju lutem vendosni moshën tuaj.');
+            return;
+        }
+        userResponses['age'] = ageInput;
+    }
+
+    // Fsheh pyetjen aktuale, përgjigjet dhe butonat e navigimit
     const currentQuestion = document.getElementById(`question${currentQuestionNumber}`);
     const currentAnswers = document.getElementById(`answers${currentQuestionNumber}`);
     const currentNavButtons = document.getElementById(`nav-buttons${currentQuestionNumber}`);
@@ -98,7 +117,7 @@ function nextQuestion(nextQuestionNumber) {
     if (currentAnswers) currentAnswers.style.display = "none";
     if (currentNavButtons) currentNavButtons.style.display = "none";
 
-    // Zeige die nächste Frage und Antworten an
+    // Shfaq pyetjen dhe përgjigjet e ardhshme
     const nextQuestionElement = document.getElementById(`question${nextQuestionNumber}`);
     const nextAnswers = document.getElementById(`answers${nextQuestionNumber}`);
     const nextNavButtons = document.getElementById(`nav-buttons${nextQuestionNumber}`);
@@ -107,22 +126,21 @@ function nextQuestion(nextQuestionNumber) {
     if (nextAnswers) nextAnswers.style.display = "block";
     if (nextNavButtons) nextNavButtons.style.display = "flex";
 
-    // Setze den Zustand des "Vazhdo"-Buttons für die nächste Frage
+    // Vendos gjendjen e butonit "Vazhdo" për pyetjen e ardhshme
     setVazhdoButtonState(nextQuestionNumber);
 
-    // Scrollt automatisch nach oben
+    // Shkoni automatikisht lart
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Ausgabe zur Fehlerverfolgung in der Konsole
-    console.log(`Zur nächsten Frage: ${nextQuestionNumber}`);
+    // Printim për gjurmim në konzolë
+    console.log(`Te pyetja tjetër: ${nextQuestionNumber}`);
 }
 
-// Funktion zum Zurückgehen zur vorherigen Frage
+// Funksioni për të kthyer te pyetja e mëparshme
 function navigateBack(previousQuestionNumber) {
-    // Bestimme die aktuelle Frage basierend auf der vorherigen Fragenummer
     const currentQuestionNumber = previousQuestionNumber + 1;
 
-    // Versteckt die aktuelle Frage, Antworten und Nav-Buttons
+    // Fsheh pyetjen aktuale, përgjigjet dhe butonat e navigimit
     const currentQuestion = document.getElementById(`question${currentQuestionNumber}`);
     const currentAnswers = document.getElementById(`answers${currentQuestionNumber}`);
     const currentNavButtons = document.getElementById(`nav-buttons${currentQuestionNumber}`);
@@ -131,7 +149,7 @@ function navigateBack(previousQuestionNumber) {
     if (currentAnswers) currentAnswers.style.display = "none";
     if (currentNavButtons) currentNavButtons.style.display = "none";
 
-    // Zeige die vorherige Frage und Antworten an
+    // Shfaq pyetjen dhe përgjigjet e mëparshme
     const previousQuestion = document.getElementById(`question${previousQuestionNumber}`);
     const previousAnswers = document.getElementById(`answers${previousQuestionNumber}`);
     const previousNavButtons = document.getElementById(`nav-buttons${previousQuestionNumber}`);
@@ -140,43 +158,46 @@ function navigateBack(previousQuestionNumber) {
     if (previousAnswers) previousAnswers.style.display = "block";
     if (previousNavButtons) previousNavButtons.style.display = "flex";
 
-    // Setze den Zustand des "Vazhdo"-Buttons für die vorherige Frage
+    // Vendos gjendjen e butonit "Vazhdo" për pyetjen e mëparshme
     setVazhdoButtonState(previousQuestionNumber);
 
-    // Scrollt automatisch nach oben
+    // Shkoni automatikisht lart
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Ausgabe zur Fehlerverfolgung in der Konsole
-    console.log(`Zur vorherigen Frage: ${previousQuestionNumber}`);
+    // Printim për gjurmim në konzolë
+    console.log(`Te pyetja e mëparshme: ${previousQuestionNumber}`);
 }
 
-// Funktion zur Aktualisierung des Sensitivitätswerts
+// Funksioni për të përditësuar vlerën e sensitivitetit
 function updateSensitivityValue(value) {
     document.getElementById("sensitivityValue").textContent = value;
-    // Optional: Speichern der Sensitivitätswerte
+    // Ruajtja e vlerës së sensitivitetit
     userResponses['sensitivity'] = value;
 }
 
-// Funktion zum Öffnen der Kamera und Initialisieren von FaceMesh
+// Funksioni për të hapur kamerën dhe inicializuar FaceMesh
 async function openCamera() {
     const video = document.getElementById('cameraView');
     const overlay = document.getElementById('overlay');
     const ctx = overlay.getContext('2d');
 
     try {
-        // Videostream abrufen
+        // Merr stream-in e videos
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "user" }
         });
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-            console.log("Video-Metadaten geladen");
+            console.log("Meta të dhënat e videos u ngarkuan");
             video.play().then(() => {
-                console.log("Video wird abgespielt");
+                console.log("Video po luan");
                 document.getElementById("cameraContainer").style.display = "block";
 
-                // Elemente einblenden nach Kamerafreigabe
+                // Fsheh pyetësorin
+                document.getElementById("question-container").style.display = "none";
+
+                // Shfaq elementet pasi kamera është hapur
                 document.getElementById('topBorder').style.display = 'block';
                 document.getElementById('bottomBorder').style.display = 'block';
                 document.getElementById('buttonLogoContainer').style.display = 'flex';
@@ -188,16 +209,16 @@ async function openCamera() {
                 initializeFaceMesh(video, overlay, ctx);
                 window.addEventListener('resize', () => resizeVideoOverlay(video, overlay));
             }).catch(error => {
-                console.error("Fehler beim Abspielen des Videos: ", error);
+                console.error("Gabim gjatë luajtjes së videos: ", error);
             });
         };
     } catch (error) {
-        console.error("Fehler beim Öffnen der Kamera: ", error);
-        alert("Die Kamera konnte nicht geöffnet werden. Stellen Sie sicher, dass Sie den Zugriff erlaubt haben.");
+        console.error("Gabim gjatë hapjes së kamerës: ", error);
+        alert("Kamera nuk mund të hapet. Ju lutem sigurohuni që keni lejuar aksesin.");
     }
 }
 
-// Funktion zur Anpassung des Video- und Overlay-Elements an die Bildschirmgröße
+// Funksioni për të përshtatur elementet e videos dhe overlay-it me madhësinë e ekranit
 function resizeVideoOverlay(video, overlay) {
     overlay.width = video.videoWidth;
     overlay.height = video.videoHeight;
@@ -217,7 +238,7 @@ function resizeVideoOverlay(video, overlay) {
     }
 }
 
-// Funktion zur Initialisierung von FaceMesh und Kamera
+// Funksioni për të inicializuar FaceMesh dhe kamerën
 function initializeFaceMesh(video, overlay, ctx) {
     const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
     faceMesh.setOptions({
@@ -234,10 +255,10 @@ function initializeFaceMesh(video, overlay, ctx) {
         }
     });
     camera.start();
-    console.log("FaceMesh erfolgreich initialisiert.");
+    console.log("FaceMesh u inicializua me sukses.");
 }
 
-// Funktion zur Verarbeitung der Ergebnisse von FaceMesh
+// Funksioni për të përpunuar rezultatet e FaceMesh
 function onFaceMeshResults(results, video, overlay, ctx) {
     ctx.clearRect(0, 0, overlay.width, overlay.height);
     ctx.drawImage(video, 0, 0, overlay.width, overlay.height);
@@ -246,11 +267,11 @@ function onFaceMeshResults(results, video, overlay, ctx) {
         const landmarks = results.multiFaceLandmarks[0];
         drawLandmarks(landmarks, ctx);
     } else {
-        console.log("Kein Gesicht erkannt.");
+        console.log("Asnjë fytyrë nuk u detektua.");
     }
 }
 
-// Funktion zum Zeichnen der Gesichtspunkte
+// Funksioni për të vizatuar pikat e fytyrës
 function drawLandmarks(landmarks, ctx) {
     ctx.fillStyle = "cyan";
     landmarks.forEach((landmark) => {
@@ -262,7 +283,7 @@ function drawLandmarks(landmarks, ctx) {
     });
 }
 
-// Funktion zum Schließen der Kamera
+// Funksioni për të mbyllur kamerën
 function closeCamera() {
     const video = document.getElementById('cameraView');
     const stream = video.srcObject;
@@ -272,43 +293,47 @@ function closeCamera() {
     }
     video.srcObject = null;
     document.getElementById("cameraContainer").style.display = "none";
+
+    // Shfaq përsëri pyetësorin
+    document.getElementById("question-container").style.display = "block";
+
     enableGestures();
-    console.log("Kamera geschlossen.");
+    console.log("Kamera u mbyll.");
 }
 
-// Funktion zum Aufnehmen eines Fotos
+// Funksioni për të bërë një foto
 function takePhoto() {
     const video = document.getElementById('cameraView');
     const overlay = document.getElementById('overlay');
 
-    // Überprüfen, ob das Video bereit ist
+    // Kontrollo nëse video është gati
     if (!video || video.readyState < 2) {
-        alert('Das Video ist noch nicht bereit. Bitte versuchen Sie es erneut.');
+        alert('Video ende nuk është gati. Ju lutem provoni përsëri.');
         return;
     }
 
-    // Ermitteln der nativen Videoabmessungen
+    // Merr dimensionet natyrore të videos
     const videoWidth = video.videoWidth;
     const videoHeight = video.videoHeight;
 
-    // Canvas erstellen und Größe setzen
+    // Krijo canvas dhe vendos madhësinë
     const canvas = document.createElement('canvas');
     canvas.width = videoWidth;
     canvas.height = videoHeight;
 
     const ctx = canvas.getContext('2d');
 
-    // Spiegelung wie im CSS aufheben
+    // Anullo pasqyrimin si në CSS
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
 
-    // Zeichnen des Videos auf das Canvas
+    // Vizato videon në canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Rückgängigmachen der Transformation für das Overlay
+    // Anullo transformimin për overlay
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    // Zeichnen des Overlays auf das Canvas
+    // Vizato overlay në canvas
     ctx.drawImage(
         overlay,
         0,
@@ -321,15 +346,21 @@ function takePhoto() {
         canvas.height
     );
 
-    // Foto als Data URL erhalten
+    // Merr foton si Data URL
     const dataURL = canvas.toDataURL('image/png');
 
-    // Speichern des Fotos und Weiterleitung
+    // Protokollo foton në konzolë
+    console.log('Foto e bërë (Data URL):', dataURL);
+
+    // Ruaj foton
     localStorage.setItem('capturedImage', dataURL);
-    window.location.href = 'nextPage.html';
+
+    // Mbyll kamerën dhe kalon te pyetja tjetër
+    closeCamera();
+    nextQuestion(2);
 }
 
-// Funktionen zur Deaktivierung und Aktivierung von Gesten
+// Funksionet për të çaktivizuar dhe aktivizuar gjestet
 function disableGestures() {
     document.addEventListener('touchmove', preventTouch, { passive: false });
     document.addEventListener('gesturestart', preventGesture);
@@ -344,17 +375,225 @@ function enableGestures() {
     document.removeEventListener('gestureend', preventGesture);
 }
 
-// Hilfsfunktionen zur Verhinderung von Gesten
+// Funksionet ndihmëse për të parandaluar gjestet
 function preventTouch(event) {
-    event.preventDefault();  // Verhindert Scrollen durch Berühren
+    event.preventDefault();  // Parandalon scroll me prekjen
 }
 
 function preventGesture(event) {
-    event.preventDefault();  // Verhindert Gesten wie Zoom
+    event.preventDefault();  // Parandalon gjestet si zoom
 }
 
-// Funktion zur Überprüfung, ob der Browser eine In-App-Browser-Umgebung ist
-function isInAppBrowser() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    return /Instagram|FBAN|FBAV|Twitter|Snapchat|LinkedIn|Pinterest|TikTok/i.test(userAgent);
+// Parandalon zoom-in me dy klikime
+window.addEventListener('dblclick', function(event) {
+    event.preventDefault();
+});
+
+// Parandalon zoom-in me kombinime tastiere (p.sh., Ctrl + Plus/Minus)
+window.addEventListener('keydown', function(event) {
+    if ((event.ctrlKey || event.metaKey) && 
+        (event.key === '+' || event.key === '-' || event.key === '=' || event.key === '0')) {
+        event.preventDefault();
+    }
+});
+
+// Parandalon zoom-in me rrotullën e miut me tastin Ctrl
+window.addEventListener('wheel', function(event) {
+    if (event.ctrlKey) {
+        event.preventDefault();
+    }
+}, { passive: false });
+
+// Parandalon gjestet e zoom-it në pajisjet me prekje
+document.addEventListener('gesturestart', function(event) {
+    event.preventDefault();
+});
+document.addEventListener('gesturechange', function(event) {
+    event.preventDefault();
+});
+document.addEventListener('gestureend', function(event) {
+    event.preventDefault();
+});
+
+// ... (Der vorherige Code bleibt unverändert)
+
+// Funktion zum Abschließen des Fragebogens
+function finishQuestionnaire() {
+    const ageInput = document.getElementById('ageInput').value.trim();
+    if (ageInput === '') {
+        alert('Ju lutem vendosni moshën tuaj.');
+        return;
+    }
+    userResponses['age'] = ageInput;
+
+    // Hol das Foto aus dem localStorage
+    const photoData = localStorage.getItem('capturedImage');
+
+    if (!photoData) {
+        alert('Asnjë foto nuk u gjet. Ju lutem filloni pyetësorin nga fillimi.');
+        return;
+    }
+
+    console.log('Pyetësori u përfundua. Të dhënat e mbledhura:', userResponses);
+
+    // Speichere die Antworten und das Foto im localStorage
+    localStorage.setItem('userResponses', JSON.stringify(userResponses));
+    localStorage.setItem('capturedImage', photoData);
+
+    // Weiterleiten zur Diagnose-Seite
+    window.location.href = 'nextPage.html';
 }
+
+// Funktion zum Anzeigen der Diagnose auf nextPage.html
+function displayDiagnosis() {
+    // Prüfe, ob wir auf nextPage.html sind
+    if (window.location.pathname.endsWith('nextPage.html')) {
+        const userResponses = JSON.parse(localStorage.getItem('userResponses'));
+        const userName = userResponses['name'];
+        const userAge = userResponses['age'];
+
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userAge').textContent = userAge;
+
+        // Logik für die Analyse
+        const skinHealthValue = Math.floor(Math.random() * 51) + 20; // 20 bis 70%
+        document.getElementById('skinHealthValue').textContent = skinHealthValue;
+
+        // Status basierend auf dem Wert
+        const skinHealthStatus = getStatusText(skinHealthValue);
+        document.getElementById('skinHealthStatus').textContent = skinHealthStatus;
+
+        // Texture immer "Care Needed"
+        document.getElementById('textureValue').textContent = Math.floor(Math.random() * 31) + 20; // 20 bis 50%
+        document.getElementById('textureStatus').textContent = 'Care Needed';
+
+        // Andere Werte zufällig generieren
+        generateRandomChart('spotsChart', 'spotsValue', 'spotsStatus');
+        generateRandomChart('wrinklesChart', 'wrinklesValue', 'wrinklesStatus');
+        generateRandomChart('rednessChart', 'rednessValue', 'rednessStatus');
+
+        // Acne basierend auf der Auswahl
+        const issues = userResponses['question3'] || [];
+        if (issues.includes('Akne')) {
+            document.getElementById('acneValue').textContent = Math.floor(Math.random() * 31) + 20; // 20 bis 50%
+            document.getElementById('acneStatus').textContent = 'Care Needed';
+        } else {
+            document.getElementById('acneValue').textContent = Math.floor(Math.random() * 51) + 50; // 50 bis 100%
+            document.getElementById('acneStatus').textContent = getStatusText(parseInt(document.getElementById('acneValue').textContent));
+        }
+
+        // Fortschrittsbalken für Elasticity und Barrier
+        setProgressBar('elasticityBar');
+        setProgressBar('barrierBar');
+    }
+}
+
+// Funktion zum Anzeigen der Diagnose auf nextPage.html
+function displayDiagnosis() {
+    // Prüfe, ob wir auf nextPage.html sind
+    if (window.location.pathname.endsWith('nextPage.html')) {
+        const userResponses = JSON.parse(localStorage.getItem('userResponses'));
+        const userName = userResponses['name'];
+        const userAge = userResponses['age'];
+        const skinTypeSelections = userResponses['question2'] || [];
+        const problemSelections = userResponses['question3'] || [];
+
+        // Anzeige von Name und Alter
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userAge').textContent = userAge;
+
+        // Einbinden des Hauttyps in die Diagnose
+        let diagnosisText = '';
+        if (skinTypeSelections.length > 0) {
+            const skinType = skinTypeSelections[0];
+            diagnosisText += `Ju keni lëkurë të tipit ${skinType.toLowerCase()}. `;
+        }
+
+        // Generieren der Diagnose basierend auf den ausgewählten Problemen
+        if (problemSelections.length > 0) {
+            diagnosisText += 'Pas analizës, kemi vërejtur se ju keni: ';
+            diagnosisText += problemSelections.map(problem => problem.toLowerCase()).join(', ') + '. ';
+
+            // Zufällige Varianten der Diagnose hinzufügen
+            const diagnosisVariants = [
+                'Rekomandojmë të përdorni produktet tona për trajtimin e këtyre problemeve.',
+                'Këshillohet të konsultoheni me një dermatolog për trajtim të mëtejshëm.',
+                'Ne kemi një gamë produktesh që mund të ndihmojnë në përmirësimin e lëkurës suaj.',
+                // ... fügen Sie hier weitere Varianten hinzu, insgesamt ca. 50 Varianten
+            ];
+
+            // Wählen Sie zufällig eine Variante aus
+            const randomIndex = Math.floor(Math.random() * diagnosisVariants.length);
+            diagnosisText += diagnosisVariants[randomIndex];
+        } else {
+            diagnosisText += 'Lëkura juaj duket e shëndetshme. ';
+            diagnosisText += 'Rekomandojmë të vazhdoni me rutinën tuaj të kujdesit.';
+        }
+
+        // Anzeige der Diagnose
+        document.getElementById('diagnosisText').textContent = diagnosisText;
+
+        // Generieren der Diagrammwerte
+        const allProblems = ['Akne', 'Poret', 'Hiperpigmentim', 'Rrudhat', 'Mirembajtje'];
+        allProblems.forEach(problem => {
+            const elementId = problem.toLowerCase(); // z.B. 'akne', 'poret', etc.
+            let value;
+            if (problemSelections.includes(problem)) {
+                // Wenn das Problem ausgewählt wurde, Wert zwischen 15% und 37%
+                value = Math.floor(Math.random() * (37 - 15 + 1)) + 15;
+            } else {
+                // Wenn das Problem nicht ausgewählt wurde, Wert zwischen 50% und 70%
+                value = Math.floor(Math.random() * (70 - 50 + 1)) + 50;
+            }
+            // Aktualisieren Sie das Diagramm oder den Fortschrittsbalken
+            const element = document.querySelector(`.progress-circle[data-category="${elementId}"]`);
+            if (element) {
+                element.dataset.percentage = value;
+                element.style.background = `conic-gradient(black ${value}%, #F6F6F7 0%)`;
+            }
+        });
+    }
+}
+
+const diagnosisVariants = [
+    'Rekomandojmë të përdorni produktet tona për trajtimin e këtyre problemeve.',
+    'Këshillohet të konsultoheni me një dermatolog për trajtim të mëtejshëm.',
+    'Ne kemi një gamë produktesh që mund të ndihmojnë në përmirësimin e lëkurës suaj.',
+    'Përdorimi i kremrave me SPF mund të ndihmojë në mbrojtjen e lëkurës tuaj.',
+    'Hidratimi i rregullt është çelësi për një lëkurë të shëndetshme.',
+    // Fügen Sie weitere Varianten hinzu...
+];
+
+
+// Hilfsfunktion, um zufällige Werte für Diagramme zu generieren
+function generateRandomChart(chartId, valueId, statusId) {
+    const value = Math.floor(Math.random() * 81) + 20; // 20 bis 100%
+    document.getElementById(valueId).textContent = value;
+    document.getElementById(statusId).textContent = getStatusText(value);
+}
+
+// Funktion, um den Status basierend auf dem Wert zu erhalten
+function getStatusText(value) {
+    if (value < 40) {
+        return 'Care Needed';
+    } else if (value < 70) {
+        return 'Normal';
+    } else {
+        return 'Good';
+    }
+}
+
+// Funktion, um Fortschrittsbalken zu setzen
+function setProgressBar(barId) {
+    const value = Math.floor(Math.random() * 81) + 20; // 20 bis 100%
+    document.getElementById(barId).style.width = value + '%';
+}
+
+// Rufe displayDiagnosis auf, wenn die Seite geladen wird
+window.onload = function() {
+    if (window.location.pathname.endsWith('nextPage.html')) {
+        displayDiagnosis();
+    } else {
+        startQuestionnaire();
+    }
+};
