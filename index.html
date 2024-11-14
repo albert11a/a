@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="sq">
 <head>
     <meta charset="UTF-8">
-    <title>Hautanalyse</title>
+    <title>Analiza e Lëkurës</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
-    <!-- Mediapipe und TensorFlow JS-Bibliotheken -->
+    <!-- Mediapipe dhe TensorFlow JS bibliotekat -->
     <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
@@ -16,23 +16,39 @@
 </head>
 <body>
 
-    <!-- Frage und Antwortbereich -->
+    <!-- Kutia e Pyetjeve dhe Përgjigjeve -->
     <div id="question-container">
 
-        <!-- Frage 1: Hauttyp -->
+        <!-- Pyetja 1: Selfie -->
         <div class="question-box" id="question1">
-            <h3>Tipi i lëkurës</h3>
+            <h3>Selfie</h3>
+            <h6>Ju lutem bëni një selfie të lëkurës tuaj tek butoni më poshtë.</h6>
+        </div>
+
+        <!-- Opsionet e Përgjigjeve për Pyetjen 1 -->
+        <div id="answers1" class="answer-box">
+            <button class="answer-button" onclick="openCamera()">Bëni selfin këtu</button>
+        </div>
+
+        <!-- Butonat e Navigimit për Pyetjen 1 -->
+        <div class="nav-buttons" id="nav-buttons1">
+            <!-- Nuk nevojitet butoni "Vazhdo", pasi kalojmë automatikisht në pyetjen tjetër -->
+        </div>
+
+        <!-- Pyetja 2: Tipi i Lëkurës -->
+        <div class="question-box" id="question2" style="display: none;">
+            <h3>Tipi i Lëkurës</h3>
             <h6>Mund të përshkruani llojin e lëkurës suaj?</h6>
         </div>
 
-        <!-- Navigations-Buttons für Frage 1 -->
-        <div class="nav-buttons" id="nav-buttons1">
-            <button class="answer-button left disabled" onclick="navigateBack()">Mbrapa</button>
-            <button class="answer-button right vazhdo-button disabled" onclick="nextQuestion(2)">Vazhdo</button>
+        <!-- Butonat e Navigimit për Pyetjen 2 -->
+        <div class="nav-buttons" id="nav-buttons2" style="display: none;">
+            <button class="answer-button left disabled" onclick="navigateBack(1)">Mbrapa</button>
+            <button class="answer-button right vazhdo-button disabled" onclick="nextQuestion(3)">Vazhdo</button>
         </div>
 
-        <!-- Antwortoptionen für Frage 1 -->
-        <div id="answers1" class="answer-options">
+        <!-- Opsionet e Përgjigjeve për Pyetjen 2 -->
+        <div id="answers2" class="answer-options" style="display: none;">
             <div class="answer-box" onclick="toggleSelection(this)">
                 <h5 class="answer-title">LËKURË TË</h5>
                 <h3 class="answer-heading">Thatë</h3>
@@ -55,20 +71,20 @@
             </div>
         </div>
 
-        <!-- Frage 2: Problembereiche -->
-        <div class="question-box" id="question2" style="display: none;">
+        <!-- Pyetja 3: Problematikat -->
+        <div class="question-box" id="question3" style="display: none;">
             <h3>Problematikat</h3>
             <h6>Ju lutem specifikoni problemet e lëkurës tuaj</h6>
         </div>
 
-        <!-- Navigations-Buttons für Frage 2 -->
-        <div class="nav-buttons" id="nav-buttons2" style="display: none;">
-            <button class="answer-button left" onclick="navigateBack(1)">Mbrapa</button>
-            <button class="answer-button right vazhdo-button disabled" onclick="nextQuestion(3)">Vazhdo</button>
+        <!-- Butonat e Navigimit për Pyetjen 3 -->
+        <div class="nav-buttons" id="nav-buttons3" style="display: none;">
+            <button class="answer-button left" onclick="navigateBack(2)">Mbrapa</button>
+            <button class="answer-button right vazhdo-button disabled" onclick="nextQuestion(4)">Vazhdo</button>
         </div>
 
-        <!-- Antwortoptionen für Frage 2 -->
-        <div id="answers2" class="answer-options" style="display: none;">
+        <!-- Opsionet e Përgjigjeve për Pyetjen 3 -->
+        <div id="answers3" class="answer-options" style="display: none;">
             <div class="answer-box" onclick="toggleSelection(this)">
                 <h3 class="answer-heading">Akne</h3>
                 <h6>Problemi juaj është akne</h6>
@@ -85,99 +101,93 @@
                 <h3 class="answer-heading">Rrudhat</h3>
                 <h6>Problemi juaj janë rrudhat</h6>
             </div>
+            <!-- Neue Antwortoption -->
+            <div class="answer-box" onclick="toggleSelection(this)">
+                <h3 class="answer-heading">Mirembajtje</h3>
+                <h6>Deshironi vetem nje mirembajte te lekures tuaj.</h6>
+            </div>
         </div>
-
-        <!-- Frage 3: Sensitivität -->
-        <div class="question-box" id="question3" style="display: none;">
+        
+        <!-- Pyetja 4: Sensitiviteti -->
+        <div class="question-box" id="question4" style="display: none;">
             <h3>Sensitiviteti</h3>
             <h6>Sa është lëkura juaj sensitive?</h6>
         </div>
 
-        <!-- Antwortoptionen für Frage 3 -->
-        <div id="answers3" class="answer-options" style="display: none;">
+        <!-- Opsionet e Përgjigjeve për Pyetjen 4 -->
+        <div id="answers4" class="answer-options" style="display: none;">
             <label for="sensitivityRange" style="display: block; font-weight: bold;">Ndjeshmëria: <span id="sensitivityValue">5</span></label>
             <input type="range" id="sensitivityRange" min="0" max="10" value="5" oninput="updateSensitivityValue(this.value)">
         </div>
 
-        <!-- Navigations-Buttons für Frage 3 -->
-        <div class="nav-buttons spaced-buttons" id="nav-buttons3" style="display: none;">
-            <button class="answer-button left" onclick="navigateBack(2)">Mbrapa</button>
-            <button class="answer-button right vazhdo-button" onclick="nextQuestion(4)">Vazhdo</button>
-        </div>
-
-        <!-- Frage 4: Namensabfrage -->
-        <div class="question-box" id="question4" style="display: none;">
-            <h3>Emri</h3>
-            <h6>Si quheni ju lutemi?</h6>
-        </div>
-
-        <!-- Antwortoptionen für Frage 4 (Name) -->
-        <div id="answers4" style="display: none;">
-            <div class="input-container">
-                <input type="text" id="nameInput" placeholder="Emri juaj" required>
-            </div>
-        </div>
-
-        <!-- Navigations-Buttons für Frage 4 -->
+        <!-- Butonat e Navigimit për Pyetjen 4 -->
         <div class="nav-buttons spaced-buttons" id="nav-buttons4" style="display: none;">
             <button class="answer-button left" onclick="navigateBack(3)">Mbrapa</button>
             <button class="answer-button right vazhdo-button" onclick="nextQuestion(5)">Vazhdo</button>
         </div>
 
-        <!-- Frage 5: Altersabfrage -->
+        <!-- Pyetja 5: Emri -->
         <div class="question-box" id="question5" style="display: none;">
-            <h3>Mosha</h3>
-            <h6>Sa vjeç jeni?</h6>
+            <h3>Emri</h3>
+            <h6>Si quheni ju lutemi?</h6>
         </div>
 
-        <!-- Antwortoptionen für Frage 5 (Alter) -->
+        <!-- Opsionet e Përgjigjeve për Pyetjen 5 (Emri) -->
         <div id="answers5" style="display: none;">
             <div class="input-container">
-                <input type="text" id="ageInput" placeholder="Mosha juaj" required>
+                <input type="text" id="nameInput" placeholder="Emri juaj" required>
             </div>
         </div>
 
-        <!-- Navigations-Buttons für Frage 5 -->
+        <!-- Butonat e Navigimit për Pyetjen 5 -->
         <div class="nav-buttons spaced-buttons" id="nav-buttons5" style="display: none;">
             <button class="answer-button left" onclick="navigateBack(4)">Mbrapa</button>
             <button class="answer-button right vazhdo-button" onclick="nextQuestion(6)">Vazhdo</button>
         </div>
 
-        <!-- Frage 6: Selfie -->
+        <!-- Pyetja 6: Mosha -->
         <div class="question-box" id="question6" style="display: none;">
-            <h3>Selfie</h3>
-            <h6>Ju lutem bëni një selfie të lëkurës tuaj tek butoni më poshtë</h6>
+            <h3>Mosha</h3>
+            <h6>Sa vjeç jeni?</h6>
         </div>
 
-        <!-- Antwortoptionen für Frage 6 -->
-        <div id="answers6" class="answer-box" style="display: none;">
-            <button class="answer-button" onclick="openCamera()">Bëni selfin këtu</button>
+        <!-- Opsionet e Përgjigjeve për Pyetjen 6 (Mosha) -->
+        <div id="answers6" style="display: none;">
+            <div class="input-container">
+                <input type="text" id="ageInput" placeholder="Mosha juaj" required>
+            </div>
+        </div>
+
+        <!-- Butonat e Navigimit për Pyetjen 6 -->
+        <div class="nav-buttons spaced-buttons" id="nav-buttons6" style="display: none;">
+            <button class="answer-button left" onclick="navigateBack(5)">Mbrapa</button>
+            <button class="answer-button right vazhdo-button" onclick="finishQuestionnaire()">Përfundo</button>
         </div>
 
     </div>
 
-    <!-- Kamera-Container -->
+    <!-- Kontejneri i Kamerës -->
     <div id="cameraContainer" style="display: none;">
-        <!-- Video und Overlay -->
+        <!-- Video dhe Overlay -->
         <video id="cameraView" autoplay playsinline></video>
         <canvas id="overlay"></canvas>
 
-        <!-- Schwarze, halbtransparente Ränder oben und unten -->
+        <!-- Kufijtë e zinj, gjysmë transparentë sipër dhe poshtë -->
         <div id="topBorder"></div>
         <div id="bottomBorder"></div>
 
-        <!-- Button- und Logo-Container -->
+        <!-- Kontejneri i Butonit dhe Logos -->
         <div id="buttonLogoContainer">
             <!-- Logo -->
             <img id="logo" src="logo.gif" alt="Logo">
-            <!-- Foto-Button -->
+            <!-- Butoni i Fotos -->
             <button id="takePhotoButton" onclick="takePhoto()">
-                <img src="button.gif" alt="Foto machen">
+                <img src="button.gif" alt="Bëni Foto">
             </button>
         </div>
 
-        <!-- Button zum Schließen -->
-        <button onclick="closeCamera()" id="closeButton" class="close-button">Schließen</button>
+        <!-- Butoni për Mbyllje -->
+        <button onclick="closeCamera()" id="closeButton" class="close-button">Mbyll</button>
     </div>
 </body>
 </html>
