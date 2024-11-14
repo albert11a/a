@@ -19,6 +19,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    h6 {
+        text-align: center;
+    }
+    
 }
 
 html, body {
@@ -419,3 +423,194 @@ button {
 .spaced-buttons {
     margin-top: 60px; /* Anpassen nach Bedarf */
 }
+
+
+
+
+
+
+/* ... (Dein vorheriger CSS-Code bleibt unverändert) */
+
+/* Stile für die Diagnose-Seite */
+
+
+/* Container für Ergebnisse */
+.result-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    text-align: left;
+    
+}
+
+.row {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 500px;
+    gap: 15px;
+}
+
+.result-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+}
+
+/* Label für alle Kreise und Balken - jetzt über den Kreisen */
+.label {
+    font-size: 0.9rem;
+    color: #333;
+    font-family: "Harmonia Sans", sans-serif;
+    margin-bottom: 5px; /* Abstand zum Kreis */
+    text-align: center;
+}
+
+/* Fortschrittskreis */
+.progress-circle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(
+        black calc(var(--percentage, 0) * 1%),
+        #F6F6F7 0%
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-circle::before {
+    content: attr(data-percentage) '%';
+    position: absolute;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* Dynamische Befüllung basierend auf Daten */
+.progress-circle[data-percentage='50'] {
+    --percentage: 50;
+}
+.progress-circle[data-percentage='30'] {
+    --percentage: 30;
+}
+.progress-circle[data-percentage='20'] {
+    --percentage: 20;
+}
+.progress-circle[data-percentage='60'] {
+    --percentage: 60;
+}
+.progress-circle[data-percentage='40'] {
+    --percentage: 40;
+}
+.progress-circle[data-percentage='70'] {
+    --percentage: 70;
+}
+
+/* Linearer Fortschrittsbalken für Elasticiteti und Barriera */
+.progress-bar {
+    position: relative;
+    width: 90px;
+    height: 15px;
+    border-radius: 10px;
+    background-color: #F6F6F7;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: calc(var(--percentage, 0) * 1%);
+    background-color: black;
+}
+
+.progress-bar[data-percentage='55'] {
+    --percentage: 55;
+}
+
+.progress-bar[data-percentage='25'] {
+    --percentage: 25;
+}
+
+/* Anpassung für kleine Texte unter den Balken */
+small {
+    font-size: 0.8rem;
+    color: #333;
+    margin-top: 5px;
+}
+
+/* Mobile-Optimierung */
+@media (max-width: 600px) {
+    .progress-circle {
+        width: 70px;
+        height: 70px;
+    }
+    .row {
+        gap: 10px;
+    }
+    .label {
+        font-size: 0.8rem;
+    }
+    .progress-bar {
+        width: 70px;
+        height: 10px;
+    }
+}
+
+/* Stil für den Diagnose-Text */
+#diagnosisText {
+    font-size: 1rem;
+    color: #333;
+    margin: 20px;
+    line-height: 1.6;
+    text-align: center;
+    font-family: "Harmonia Sans", sans-serif;
+}
+
+.answer-box {
+    background-color: #F6F6F7;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    font-family: "Harmonia Sans", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    
+}
+
+/* Allgemeine Stile für .answer-box */
+.answer-box {
+    /* ... andere Stile ... */
+    /* Entfernen Sie text-align: center; wenn vorhanden */
+    /* text-align: center; */
+}
+
+/* Spezifische Stile für die Diagnosebox */
+.answer-box.diagnosis-box {
+    text-align: left;
+    align-items: flex-start;
+}
+
+.answer-box.diagnosis-box h3,
+.answer-box.diagnosis-box h6,
+.answer-box.diagnosis-box p {
+    text-align: left;
+}
+
+#diagnosisText {
+    text-align: left !important;
+}
+
