@@ -4,6 +4,22 @@ const userResponses = {};
 // Lista e pyetjeve që kërkojnë zgjedhje
 const selectionRequiredQuestions = [2, 3];
 
+// Hilfsfunktion, um einen zufälligen Wert innerhalb eines Bereichs zu generieren
+function getRandomValue(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Hilfsfunktion, um den Status basierend auf dem Wert zu erhalten
+function getStatusText(value) {
+    if (value < 40) {
+        return 'Care Needed';
+    } else if (value < 70) {
+        return 'Normal';
+    } else {
+        return 'Good';
+    }
+}
+
 // Funksioni për të filluar pyetësorin
 function startQuestionnaire() {
     // Fillojmë direkt me pyetjen e parë
@@ -14,7 +30,13 @@ function startQuestionnaire() {
 }
 
 // Fillojmë pyetësorin kur faqja ngarkohet
-window.onload = startQuestionnaire;
+window.onload = function() {
+    if (window.location.pathname.endsWith('nextPage.html')) {
+        displayDiagnosis();
+    } else {
+        startQuestionnaire();
+    }
+};
 
 // Funksioni për të ndërruar zgjedhjen e kutive të përgjigjeve
 function toggleSelection(element) {
@@ -301,63 +323,29 @@ function closeCamera() {
     console.log("Kamera u mbyll.");
 }
 
-// Funksioni për të bërë një foto
 function takePhoto() {
-    const video = document.getElementById('cameraView');
-    const overlay = document.getElementById('overlay');
+    // ... (Ihr bestehender Code zum Aufnehmen des Fotos)
 
-    // Kontrollo nëse video është gati
-    if (!video || video.readyState < 2) {
-        alert('Video ende nuk është gati. Ju lutem provoni përsëri.');
-        return;
+    // Setze das Bild im Ladebildschirm (falls Sie das Bild anzeigen)
+    // document.getElementById('loadingPhoto').src = dataURL;
+
+    // Verstecke den Kamera-Container
+    document.getElementById("cameraContainer").style.display = "none";
+
+    // Zeige den Ladebildschirm
+    document.getElementById("loadingScreen").style.display = "flex";
+
+    // **Löse die Vibration für 3 Sekunden aus, falls unterstützt**
+    if (navigator.vibrate) {
+        navigator.vibrate(3000);
     }
 
-    // Merr dimensionet natyrore të videos
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-
-    // Krijo canvas dhe vendos madhësinë
-    const canvas = document.createElement('canvas');
-    canvas.width = videoWidth;
-    canvas.height = videoHeight;
-
-    const ctx = canvas.getContext('2d');
-
-    // Anullo pasqyrimin si në CSS
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-
-    // Vizato videon në canvas
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Anullo transformimin për overlay
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    // Vizato overlay në canvas
-    ctx.drawImage(
-        overlay,
-        0,
-        0,
-        overlay.width,
-        overlay.height,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-    // Merr foton si Data URL
-    const dataURL = canvas.toDataURL('image/png');
-
-    // Protokollo foton në konzolë
-    console.log('Foto e bërë (Data URL):', dataURL);
-
-    // Ruaj foton
-    localStorage.setItem('capturedImage', dataURL);
-
-    // Mbyll kamerën dhe kalon te pyetja tjetër
-    closeCamera();
-    nextQuestion(2);
+    // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur ersten Frage weiterleiten
+    setTimeout(function() {
+        document.getElementById("loadingScreen").style.display = "none";
+        closeCamera();
+        nextQuestion(2); // Weiter zur ersten Frage
+    }, 3500);
 }
 
 // Funksionet për të çaktivizuar dhe aktivizuar gjestet
@@ -415,8 +403,6 @@ document.addEventListener('gestureend', function(event) {
     event.preventDefault();
 });
 
-// ... (Der vorherige Code bleibt unverändert)
-
 // Funktion zum Abschließen des Fragebogens
 function finishQuestionnaire() {
     const ageInput = document.getElementById('ageInput').value.trim();
@@ -440,160 +426,250 @@ function finishQuestionnaire() {
     localStorage.setItem('userResponses', JSON.stringify(userResponses));
     localStorage.setItem('capturedImage', photoData);
 
+    // Generieren der Diagnose-Daten
+    const diagnosisData = generateDiagnosis(userResponses);
+    localStorage.setItem('diagnosisData', JSON.stringify(diagnosisData));
+
     // Weiterleiten zur Diagnose-Seite
     window.location.href = 'nextPage.html';
 }
 
-// Funktion zum Anzeigen der Diagnose auf nextPage.html
-function displayDiagnosis() {
-    // Prüfe, ob wir auf nextPage.html sind
-    if (window.location.pathname.endsWith('nextPage.html')) {
-        const userResponses = JSON.parse(localStorage.getItem('userResponses'));
-        const userName = userResponses['name'];
-        const userAge = userResponses['age'];
-
-        document.getElementById('userName').textContent = userName;
-        document.getElementById('userAge').textContent = userAge;
-
-        // Logik für die Analyse
-        const skinHealthValue = Math.floor(Math.random() * 51) + 20; // 20 bis 70%
-        document.getElementById('skinHealthValue').textContent = skinHealthValue;
-
-        // Status basierend auf dem Wert
-        const skinHealthStatus = getStatusText(skinHealthValue);
-        document.getElementById('skinHealthStatus').textContent = skinHealthStatus;
-
-        // Texture immer "Care Needed"
-        document.getElementById('textureValue').textContent = Math.floor(Math.random() * 31) + 20; // 20 bis 50%
-        document.getElementById('textureStatus').textContent = 'Care Needed';
-
-        // Andere Werte zufällig generieren
-        generateRandomChart('spotsChart', 'spotsValue', 'spotsStatus');
-        generateRandomChart('wrinklesChart', 'wrinklesValue', 'wrinklesStatus');
-        generateRandomChart('rednessChart', 'rednessValue', 'rednessStatus');
-
-        // Acne basierend auf der Auswahl
-        const issues = userResponses['question3'] || [];
-        if (issues.includes('Akne')) {
-            document.getElementById('acneValue').textContent = Math.floor(Math.random() * 31) + 20; // 20 bis 50%
-            document.getElementById('acneStatus').textContent = 'Care Needed';
-        } else {
-            document.getElementById('acneValue').textContent = Math.floor(Math.random() * 51) + 50; // 50 bis 100%
-            document.getElementById('acneStatus').textContent = getStatusText(parseInt(document.getElementById('acneValue').textContent));
-        }
-
-        // Fortschrittsbalken für Elasticity und Barrier
-        setProgressBar('elasticityBar');
-        setProgressBar('barrierBar');
+// Funktion zum Generieren der Diagnose-Daten
+function generateDiagnosis(userResponses) {
+    // Generierung der Basiseigenschaften
+    const skinHealthValue = getRandomValue(20, 70); // 20 bis 70%
+    const skinHealthStatus = getStatusText(skinHealthValue);
+    
+    const textureValue = getRandomValue(20, 50); // 20 bis 50%
+    const textureStatus = 'Care Needed';
+    
+    // Definieren der spezifischen Probleme und deren Bereiche (ohne 'Mirembajte')
+    const problemsConfig = {
+        'Akne': { selected: false, selectedRange: [11, 37], defaultRange: [52, 69] },
+        'Poret': { selected: false, selectedRange: [14, 28], defaultRange: [52, 69] },
+        'Hiperpigmentim': { selected: false, selectedRange: [14, 34], defaultRange: [52, 69] },
+        'Rrudhat': { selected: false, selectedRange: [24, 39], defaultRange: [52, 69] }
+    };
+    
+    // Überprüfen, welche Probleme ausgewählt wurden
+    if (userResponses['question3'] && userResponses['question3'].length > 0) {
+        userResponses['question3'].forEach(problem => {
+            if (problemsConfig.hasOwnProperty(problem)) {
+                problemsConfig[problem].selected = true;
+            }
+        });
     }
+    
+    // Generierung der Werte für jedes Problem
+    const diagnosisData = {
+        skinHealthValue: skinHealthValue,
+        skinHealthStatus: skinHealthStatus,
+        textureValue: textureValue,
+        textureStatus: textureStatus,
+        diagnosisText: '', // Wird später generiert
+        elasticityValue: getRandomValue(20, 100), // Beispielbereich
+        barrierValue: getRandomValue(20, 100)    // Beispielbereich
+    };
+    
+    // Generierung der Werte für spezifische Probleme
+    for (const [problem, config] of Object.entries(problemsConfig)) {
+        if (config.selected) {
+            diagnosisData[`${problem.toLowerCase()}Value`] = getRandomValue(config.selectedRange[0], config.selectedRange[1]);
+        } else {
+            diagnosisData[`${problem.toLowerCase()}Value`] = getRandomValue(config.defaultRange[0], config.defaultRange[1]);
+        }
+    }
+    
+    // Zusätzliche Logik für 'Shëndeti i Lëkurës' basierend auf 'Mirembajtje'
+    const isMirembajtjeSelected = userResponses['question3'] && userResponses['question3'].includes('Mirembajtje');
+    if (isMirembajtjeSelected) {
+        diagnosisData.shendetiValue = getRandomValue(8, 27);
+    } else {
+        diagnosisData.shendetiValue = getRandomValue(52, 69);
+    }
+    diagnosisData.shendetiStatus = getStatusText(diagnosisData.shendetiValue);
+    
+    // Generierung des Diagnose-Texts basierend auf Hauttyp und Problemstellungen
+    let diagnosisText = '';
+    
+    // Integration des ausgewählten Hauttyps
+    if (userResponses['question2'] && userResponses['question2'].length > 0) {
+        const skinType = userResponses['question2'][0];
+        switch (skinType) {
+            case 'Thate':
+                diagnosisText += 'Sebumi i lëkurës tuaj është i thatë. ';
+                break;
+            case 'Yndyrshme':
+                diagnosisText += 'Sebumi i lëkurës tuaj është i yndyrshëm. ';
+                break;
+            case 'Kombinuar':
+                diagnosisText += 'Sebumi i lëkurës tuaj është i kombinuar. ';
+                break;
+            case 'Normal':
+                diagnosisText += 'Sebumi i lëkurës tuaj është normal. ';
+                break;
+            default:
+                diagnosisText += 'Sebumi i lëkurës tuaj është në gjendje të mirë. ';
+        }
+    }
+    
+    // Integration der ausgewählten Problemstellungen
+    if (userResponses['question3'] && userResponses['question3'].length > 0) {
+        diagnosisText += 'Pas analizës, kemi vërejtur se keni problemet e mëposhtme: ';
+        diagnosisText += userResponses['question3'].join(', ').toLowerCase() + '. ';
+        
+        // Auswahl einer zufälligen Diagnosevariante
+        const diagnosisVariants = [
+            'Kemi identifikuar këto probleme si rezultat të faktorëve të ndryshëm të jetës së përditshme dhe ambientit. ',
+            'Këto probleme mund të shkaktohen nga stresi, ushqimi, dhe mungesa e kujdesit adekuat të lëkurës. ',
+            'Analiza jonë tregon që këto çështje kërkojnë vëmendje dhe mirëmbajtje të vazhdueshme. ',
+            'Këto problematika janë shpesh rezultat i përdorimit të duhur të produkteve për kujdesin e lëkurës. ',
+            'Faktorët gjenetikë dhe mjedisorë luajnë një rol të rëndësishëm në shfaqjen e këtyre problemeve. ',
+            'Këto probleme shpesh lidhen me mungesën e hidratimit adekuat dhe ekspozimin ndaj faktorëve të jashtëm. ',
+            'Shëndeti i përgjithshëm dhe dieta juaj kanë një ndikim të madh në gjendjen e lëkurës. ',
+            'Nivelet e lartë të stresit dhe jetesa në mjedise të ndotura mund të kontribuojnë në këto çështje. ',
+            'Mungesa e gjumit të mjaftueshëm dhe aktiviteti fizik i pamjaftueshëm mund të ndikojnë negativisht në shëndetin e lëkurës. ',
+            'Produktet e tepërt për kujdesin e lëkurës mund të çojnë në irritim dhe probleme të tjera. '
+            // Shtoni më shumë variante sipas nevojës
+        ];
+        
+        const randomIndex = Math.floor(Math.random() * diagnosisVariants.length);
+        diagnosisText += diagnosisVariants[randomIndex];
+    } else {
+        diagnosisText += 'Lëkura juaj duket e shëndetshme. Rekomandojmë të vazhdoni me rutinën tuaj të kujdesit të lëkurës. ';
+    }
+    
+    // Zusätzliche Diagnose-Informationen
+    diagnosisText += 'Është e rëndësishme të kuptoni se kujdesi adekuat për lëkurën mund të ndihmojë në parandalimin dhe përmirësimin e këtyre problemeve. ';
+    
+    diagnosisData.diagnosisText = diagnosisText;
+    
+    return diagnosisData;
 }
 
 // Funktion zum Anzeigen der Diagnose auf nextPage.html
 function displayDiagnosis() {
     // Prüfe, ob wir auf nextPage.html sind
     if (window.location.pathname.endsWith('nextPage.html')) {
+        // Abrufen der Benutzerantworten
         const userResponses = JSON.parse(localStorage.getItem('userResponses'));
+        if (!userResponses) {
+            alert('Asnjë përgjigje u gjet. Ju lutem filloni pyetësorin.');
+            return;
+        }
+
         const userName = userResponses['name'];
         const userAge = userResponses['age'];
         const skinTypeSelections = userResponses['question2'] || [];
         const problemSelections = userResponses['question3'] || [];
 
         // Anzeige von Name und Alter
-        document.getElementById('userName').textContent = userName;
-        document.getElementById('userAge').textContent = userAge;
+        const userNameElement = document.getElementById('userName');
+        const userAgeElement = document.getElementById('userAge');
+        if (userNameElement) userNameElement.textContent = userName;
+        if (userAgeElement) userAgeElement.textContent = userAge;
 
-        // Einbinden des Hauttyps in die Diagnose
-        let diagnosisText = '';
-        if (skinTypeSelections.length > 0) {
-            const skinType = skinTypeSelections[0];
-            diagnosisText += `Ju keni lëkurë të tipit ${skinType.toLowerCase()}. `;
+        // Abrufen der Diagnose-Daten aus localStorage
+        const diagnosisData = JSON.parse(localStorage.getItem('diagnosisData'));
+        if (!diagnosisData) {
+            alert('Asnjë diagnozë u gjet. Ju lutem filloni pyetësorin.');
+            return;
         }
 
-        // Generieren der Diagnose basierend auf den ausgewählten Problemen
-        if (problemSelections.length > 0) {
-            diagnosisText += 'Pas analizës, kemi vërejtur se ju keni: ';
-            diagnosisText += problemSelections.map(problem => problem.toLowerCase()).join(', ') + '. ';
+         // Anzeige der Diagnose-Daten
+         const diagnosisTextElement = document.getElementById('diagnosisText');
+         if (diagnosisTextElement) {
+             diagnosisTextElement.textContent = diagnosisData.diagnosisText;
+             diagnosisTextElement.style.textAlign = 'left'; // Links-Ausrichtung setzen
+             // Optional: Weitere Stile setzen, falls nötig
+             diagnosisTextElement.style.fontSize = '1rem';
+             diagnosisTextElement.style.color = '#333';
+             diagnosisTextElement.style.margin = '20px';
+             diagnosisTextElement.style.lineHeight = '1.6';
+             diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
+         }
+         
+        // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës'
+        const shendetiValueElement = document.getElementById('shendetiValue');
+        const shendetiStatusElement = document.getElementById('shendetiStatus');
+        if (shendetiValueElement) shendetiValueElement.textContent = diagnosisData.shendetiValue;
+        if (shendetiStatusElement) shendetiStatusElement.textContent = diagnosisData.shendetiStatus;
 
-            // Zufällige Varianten der Diagnose hinzufügen
-            const diagnosisVariants = [
-                'Rekomandojmë të përdorni produktet tona për trajtimin e këtyre problemeve.',
-                'Këshillohet të konsultoheni me një dermatolog për trajtim të mëtejshëm.',
-                'Ne kemi një gamë produktesh që mund të ndihmojnë në përmirësimin e lëkurës suaj.',
-                // ... fügen Sie hier weitere Varianten hinzu, insgesamt ca. 50 Varianten
-            ];
+        // Anzeige der Diagrammwerte für andere Probleme
+        const poretValueElement = document.getElementById('poretValue');
+        const poretStatusElement = document.getElementById('poretStatus');
+        if (poretValueElement) poretValueElement.textContent = diagnosisData.poretValue;
+        if (poretStatusElement) poretStatusElement.textContent = getStatusText(diagnosisData.poretValue);
 
-            // Wählen Sie zufällig eine Variante aus
-            const randomIndex = Math.floor(Math.random() * diagnosisVariants.length);
-            diagnosisText += diagnosisVariants[randomIndex];
-        } else {
-            diagnosisText += 'Lëkura juaj duket e shëndetshme. ';
-            diagnosisText += 'Rekomandojmë të vazhdoni me rutinën tuaj të kujdesit.';
+        const textureValueElement = document.getElementById('textureValue');
+        const textureStatusElement = document.getElementById('textureStatus');
+        if (textureValueElement) textureValueElement.textContent = diagnosisData.textureValue;
+        if (textureStatusElement) textureStatusElement.textContent = diagnosisData.textureStatus;
+
+        const rrudhatValueElement = document.getElementById('rrudhatValue');
+        const rrudhatStatusElement = document.getElementById('rrudhatStatus');
+        if (rrudhatValueElement) rrudhatValueElement.textContent = diagnosisData.rrudhatValue;
+        if (rrudhatStatusElement) rrudhatStatusElement.textContent = getStatusText(diagnosisData.rrudhatValue);
+
+        const hiperpigmentimValueElement = document.getElementById('hiperpigmentimValue');
+        const hiperpigmentimStatusElement = document.getElementById('hiperpigmentimStatus');
+        if (hiperpigmentimValueElement) hiperpigmentimValueElement.textContent = diagnosisData.hiperpigmentimValue;
+        if (hiperpigmentimStatusElement) hiperpigmentimStatusElement.textContent = getStatusText(diagnosisData.hiperpigmentimValue);
+
+        const akneValueElement = document.getElementById('akneValue');
+        const akneStatusElement = document.getElementById('akneStatus');
+        if (akneValueElement) akneValueElement.textContent = diagnosisData.akneValue;
+        if (akneStatusElement) akneStatusElement.textContent = getStatusText(diagnosisData.akneValue);
+
+        // Aktualisieren der progress-circle Hintergrundfarben für 'Shëndeti i Lëkurës'
+        const shendetiCircle = document.querySelector(`.progress-circle[data-category="shendeti"]`);
+        if (shendetiCircle) {
+            shendetiCircle.dataset.percentage = diagnosisData.shendetiValue;
+            shendetiCircle.style.background = `conic-gradient(black ${diagnosisData.shendetiValue}%, #F6F6F7 0%)`;
         }
 
-        // Anzeige der Diagnose
-        document.getElementById('diagnosisText').textContent = diagnosisText;
+        // Aktualisieren der progress-circle Hintergrundfarben für andere Probleme
+        const poretCircle = document.querySelector(`.progress-circle[data-category="poret"]`);
+        if (poretCircle) {
+            poretCircle.dataset.percentage = diagnosisData.poretValue;
+            poretCircle.style.background = `conic-gradient(black ${diagnosisData.poretValue}%, #F6F6F7 0%)`;
+        }
 
-        // Generieren der Diagrammwerte
-        const allProblems = ['Akne', 'Poret', 'Hiperpigmentim', 'Rrudhat', 'Mirembajtje'];
-        allProblems.forEach(problem => {
-            const elementId = problem.toLowerCase(); // z.B. 'akne', 'poret', etc.
-            let value;
-            if (problemSelections.includes(problem)) {
-                // Wenn das Problem ausgewählt wurde, Wert zwischen 15% und 37%
-                value = Math.floor(Math.random() * (37 - 15 + 1)) + 15;
-            } else {
-                // Wenn das Problem nicht ausgewählt wurde, Wert zwischen 50% und 70%
-                value = Math.floor(Math.random() * (70 - 50 + 1)) + 50;
-            }
-            // Aktualisieren Sie das Diagramm oder den Fortschrittsbalken
-            const element = document.querySelector(`.progress-circle[data-category="${elementId}"]`);
-            if (element) {
-                element.dataset.percentage = value;
-                element.style.background = `conic-gradient(black ${value}%, #F6F6F7 0%)`;
-            }
-        });
+        const textureCircle = document.querySelector(`.progress-circle[data-category="tekstura"]`);
+        if (textureCircle) {
+            textureCircle.dataset.percentage = diagnosisData.textureValue;
+            textureCircle.style.background = `conic-gradient(black ${diagnosisData.textureValue}%, #F6F6F7 0%)`;
+        }
+
+        const rrudhatCircle = document.querySelector(`.progress-circle[data-category="rrudhat"]`);
+        if (rrudhatCircle) {
+            rrudhatCircle.dataset.percentage = diagnosisData.rrudhatValue;
+            rrudhatCircle.style.background = `conic-gradient(black ${diagnosisData.rrudhatValue}%, #F6F6F7 0%)`;
+        }
+
+        const hiperpigmentimCircle = document.querySelector(`.progress-circle[data-category="hiperpigmentim"]`);
+        if (hiperpigmentimCircle) {
+            hiperpigmentimCircle.dataset.percentage = diagnosisData.hiperpigmentimValue;
+            hiperpigmentimCircle.style.background = `conic-gradient(black ${diagnosisData.hiperpigmentimValue}%, #F6F6F7 0%)`;
+        }
+
+        const akneCircle = document.querySelector(`.progress-circle[data-category="akne"]`);
+        if (akneCircle) {
+            akneCircle.dataset.percentage = diagnosisData.akneValue;
+            akneCircle.style.background = `conic-gradient(black ${diagnosisData.akneValue}%, #F6F6F7 0%)`;
+        }
+
+        // Setzen der Fortschrittsbalken für Elasticity und Barrier
+        const elasticityBar = document.getElementById('elasticityBar');
+        if (elasticityBar) {
+            elasticityBar.style.width = `${diagnosisData.elasticityValue}%`;
+            elasticityBar.setAttribute('data-status', getStatusText(diagnosisData.elasticityValue));
+        }
+
+        const barrierBar = document.getElementById('barrierBar');
+        if (barrierBar) {
+            barrierBar.style.width = `${diagnosisData.barrierValue}%`;
+            barrierBar.setAttribute('data-status', getStatusText(diagnosisData.barrierValue));
+        }
     }
 }
-
-const diagnosisVariants = [
-    'Rekomandojmë të përdorni produktet tona për trajtimin e këtyre problemeve.',
-    'Këshillohet të konsultoheni me një dermatolog për trajtim të mëtejshëm.',
-    'Ne kemi një gamë produktesh që mund të ndihmojnë në përmirësimin e lëkurës suaj.',
-    'Përdorimi i kremrave me SPF mund të ndihmojë në mbrojtjen e lëkurës tuaj.',
-    'Hidratimi i rregullt është çelësi për një lëkurë të shëndetshme.',
-    // Fügen Sie weitere Varianten hinzu...
-];
-
-
-// Hilfsfunktion, um zufällige Werte für Diagramme zu generieren
-function generateRandomChart(chartId, valueId, statusId) {
-    const value = Math.floor(Math.random() * 81) + 20; // 20 bis 100%
-    document.getElementById(valueId).textContent = value;
-    document.getElementById(statusId).textContent = getStatusText(value);
-}
-
-// Funktion, um den Status basierend auf dem Wert zu erhalten
-function getStatusText(value) {
-    if (value < 40) {
-        return 'Care Needed';
-    } else if (value < 70) {
-        return 'Normal';
-    } else {
-        return 'Good';
-    }
-}
-
-// Funktion, um Fortschrittsbalken zu setzen
-function setProgressBar(barId) {
-    const value = Math.floor(Math.random() * 81) + 20; // 20 bis 100%
-    document.getElementById(barId).style.width = value + '%';
-}
-
-// Rufe displayDiagnosis auf, wenn die Seite geladen wird
-window.onload = function() {
-    if (window.location.pathname.endsWith('nextPage.html')) {
-        displayDiagnosis();
-    } else {
-        startQuestionnaire();
-    }
-};
