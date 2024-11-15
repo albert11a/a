@@ -427,9 +427,6 @@ button {
 }
 
 
-
-
-
 /* Stile für die Diagnose-Seite */
 
 /* Container für Ergebnisse */
@@ -568,47 +565,55 @@ small {
     text-align: left;
 }
 
-/* Loading Screen Styles */
+/* Stil für den bestehenden Ladebildschirm mit zusätzlichem Logo */
 #loadingScreen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #ffffff;
-    z-index: 2000;
+    background-color: #ffffff; /* Weißer Hintergrund */
+    z-index: 2000; /* Sicherstellen, dass es über anderen Elementen liegt */
     display: flex;
-    justify-content: center; /* Zentriert den Inhalt horizontal */
-    align-items: center;     /* Zentriert den Inhalt vertikal */
+    justify-content: center; /* Horizontale Zentrierung */
+    align-items: center;     /* Vertikale Zentrierung */
 }
 
-.loading-content {
+#loadingScreen .loading-content {
     display: flex;
-    flex-direction: column;   /* Ordnet die Elemente untereinander an */
-    align-items: center;      /* Zentriert die Elemente horizontal */
+    flex-direction: column; /* Elemente untereinander anordnen */
+    align-items: center;    /* Horizontale Zentrierung */
 }
 
-.loading-content .spinner {
-    width: 50px;              /* Passen Sie die Größe nach Wunsch an */
-    height: 50px;             /* Passen Sie die Größe nach Wunsch an */
+#loadingScreen .spinner {
+    width: 50px;              /* Größe des Spinners */
+    height: 50px;
     border: 8px solid #f3f3f3;
     border-top: 8px solid #000000;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-bottom: 20px;      /* Abstand zum Text darunter */
+    margin-bottom: 20px;      /* Abstand zum Logo */
 }
 
-.loading-content h6 {
+#loadingScreen .loading-logo {
+    width: 80px;             /* Anpassung der Logo-Größe nach Bedarf */
+    height: auto;
+    margin-bottom: 20px;      /* Abstand zur Nachricht */
+}
+
+#loadingScreen h6 {
     font-size: 1rem;
     color: #333;
     font-family: "Harmonia Sans", sans-serif;
     text-align: center;       /* Text zentrieren */
 }
 
+/* Schlüsselbilder für die Dreh-Animation (bereits vorhanden) */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
 
 /* Grundlegendes Styling für den Header */
 .header {
@@ -646,4 +651,55 @@ small {
     line-height: 1.6;
     text-align: left; /* Links-Ausrichtung */
     font-family: "Harmonia Sans", sans-serif;
+}
+
+/* Bestehende CSS-Regeln ... */
+
+/* Stil für den neuen Ladebildschirm nach Frage 6 */
+#loadingScreen2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff; /* Weißer Hintergrund */
+    z-index: 3000; /* Höher als der bestehende Ladebildschirm */
+    display: flex;
+    justify-content: center; /* Horizontale Zentrierung */
+    align-items: center;     /* Vertikale Zentrierung */
+}
+
+#loadingScreen2 .loading-content {
+    display: flex;
+    flex-direction: column; /* Elemente untereinander anordnen */
+    align-items: center;    /* Horizontale Zentrierung */
+}
+
+#loadingScreen2 .spinner {
+    width: 50px;              /* Größe des Spinners */
+    height: 50px;
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #000000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;      /* Abstand zum Logo */
+}
+
+#loadingScreen2 .loading-logo {
+    width: 80px;             /* Anpassung der Logo-Größe nach Bedarf */
+    height: auto;
+    margin-bottom: 20px;      /* Abstand zur optionalen Nachricht */
+}
+
+#loadingScreen2 h6 {
+    font-size: 09rem;
+    color: #333;
+    font-family: "Harmonia Sans", sans-serif;
+    text-align: center;
+}
+
+/* Schlüsselbilder für die Dreh-Animation (bestehend) */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
