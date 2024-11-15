@@ -1,15 +1,27 @@
-// Objekt për ruajtjen e përgjigjeve të përdoruesit
+// Objekt zur Speicherung der Benutzerantworten
 const userResponses = {};
 
-// Lista e pyetjeve që kërkojnë zgjedhje
+/**
+ * Liste der Fragen, die eine Auswahl erfordern.
+ * Diese Fragen müssen eine oder mehrere Antworten vom Benutzer erhalten, bevor er fortfahren kann.
+ */
 const selectionRequiredQuestions = [2, 3];
 
-// Hilfsfunktion, um einen zufälligen Wert innerhalb eines Bereichs zu generieren
+/**
+ * Hilfsfunktion zur Generierung eines zufälligen Wertes innerhalb eines angegebenen Bereichs.
+ * @param {number} min - Der minimale Wert (inklusive).
+ * @param {number} max - Der maximale Wert (inklusive).
+ * @returns {number} - Ein zufälliger Ganzzahlwert zwischen min und max.
+ */
 function getRandomValue(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Hilfsfunktion, um den Status basierend auf dem Wert zu erhalten
+/**
+ * Hilfsfunktion zur Bestimmung des Status basierend auf einem numerischen Wert.
+ * @param {number} value - Der Wert, der bewertet werden soll.
+ * @returns {string} - Der Status als Text ("Care Needed", "Normal", "Good").
+ */
 function getStatusText(value) {
     if (value < 40) {
         return 'Care Needed';
@@ -20,16 +32,25 @@ function getStatusText(value) {
     }
 }
 
-// Funksioni për të filluar pyetësorin
+/**
+ * Funktion zum Starten des Fragebogens.
+ * Sie zeigt die erste Frage sowie die zugehörigen Antworten und Navigationsbuttons an.
+ */
 function startQuestionnaire() {
-    // Fillojmë direkt me pyetjen e parë
+    // Anzeige des gesamten Fragecontainers
     document.getElementById("question-container").style.display = "block";
+    // Anzeige der ersten Frage
     document.getElementById("question1").style.display = "block";
+    // Anzeige der Antwortmöglichkeiten zur ersten Frage
     document.getElementById("answers1").style.display = "block";
+    // Anzeige der Navigationsbuttons zur ersten Frage
     document.getElementById("nav-buttons1").style.display = "flex";
 }
 
-// Fillojmë pyetësorin kur faqja ngarkohet
+/**
+ * Event-Listener, der den Fragebogen beim Laden der Seite startet
+ * oder die Diagnoseseite anzeigt, falls bereits ein Fragebogen abgeschlossen wurde.
+ */
 window.onload = function() {
     if (window.location.pathname.endsWith('nextPage.html')) {
         displayDiagnosis();
@@ -38,16 +59,22 @@ window.onload = function() {
     }
 };
 
-// Funksioni për të ndërruar zgjedhjen e kutive të përgjigjeve
+/**
+ * Funktion zum Umschalten der Auswahl von Antwortboxen.
+ * @param {HTMLElement} element - Das angeklickte Antwortfeld.
+ */
 function toggleSelection(element) {
-    // Vetëm për pyetjet që kërkojnë zgjedhje
+    // Bestimmen der Frage-ID basierend auf dem übergeordneten Element
     const questionId = element.parentElement.id;
     const questionNumber = parseInt(questionId.replace('answers', ''));
+    
+    // Überprüfen, ob die aktuelle Frage eine Auswahl erfordert
     if (!selectionRequiredQuestions.includes(questionNumber)) return;
 
+    // Umschalten der 'selected' Klasse zur visuellen Hervorhebung
     element.classList.toggle('selected');
 
-    // Ruajtja e përgjigjeve të zgjedhura
+    // Sammeln aller ausgewählten Antworten innerhalb der aktuellen Frage
     const selectedAnswers = element.parentElement.querySelectorAll('.answer-box.selected');
     const selectedTexts = Array.from(selectedAnswers).map(box => {
         const heading = box.querySelector('.answer-heading');
@@ -57,40 +84,47 @@ function toggleSelection(element) {
             return box.querySelector('input').value.trim();
         }
     });
+
+    // Speichern der ausgewählten Antworten im userResponses Objekt
     userResponses[`question${questionNumber}`] = selectedTexts;
 
-    // Përditëso gjendjen e butonit "Vazhdo"
+    // Aktualisieren des Zustands des "Vazhdo" (Weiter) Buttons
     setVazhdoButtonState(questionNumber);
 }
 
-// Funksioni për të vendosur gjendjen e butonave "Vazhdo" dhe "Mbrapa"
+/**
+ * Funktion zur Einstellung des Zustands der Navigationsbuttons ("Vazhdo" und "Mbrapa").
+ * @param {number} questionNumber - Die Nummer der aktuellen Frage.
+ */
 function setVazhdoButtonState(questionNumber) {
+    // Zugriff auf die Navigationsbuttons der aktuellen Frage
     const navButtons = document.getElementById(`nav-buttons${questionNumber}`);
     if (!navButtons) return;
 
-    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // Butoni "Vazhdo"
-    const backButton = navButtons.querySelector('.left'); // Butoni "Mbrapa"
+    const vazhdoButton = navButtons.querySelector('.vazhdo-button'); // "Vazhdo" (Weiter) Button
+    const backButton = navButtons.querySelector('.left'); // "Mbrapa" (Zurück) Button
 
+    // Für Frage 1 gibt es keinen "Vazhdo" Button
     if (questionNumber === 1) {
-        // Për pyetjen 1 nuk ka buton "Vazhdo"
         return;
     }
 
+    // Überprüfen, ob die aktuelle Frage eine Auswahl erfordert
     if (selectionRequiredQuestions.includes(questionNumber)) {
-        // Kontrollo nëse ka përgjigje të zgjedhura
+        // Überprüfen, ob mindestens eine Antwort ausgewählt wurde
         const selected = userResponses[`question${questionNumber}`] && userResponses[`question${questionNumber}`].length > 0;
 
         if (selected) {
-            vazhdoButton.classList.remove('disabled');
+            vazhdoButton.classList.remove('disabled'); // Aktivieren des "Vazhdo" Buttons
         } else {
-            vazhdoButton.classList.add('disabled');
+            vazhdoButton.classList.add('disabled'); // Deaktivieren des "Vazhdo" Buttons
         }
     } else {
-        // Pyetjet që nuk kërkojnë zgjedhje
+        // Für Fragen, die keine Auswahl erfordern, den "Vazhdo" Button aktivieren
         vazhdoButton.classList.remove('disabled');
     }
 
-    // Trajtim special për pyetjen e dytë: butoni "Mbrapa" të jetë i çaktivizuar
+    // Spezieller Fall für Frage 2: Den "Mbrapa" Button deaktivieren
     if (questionNumber === 2) {
         if (backButton) backButton.classList.add('disabled');
     } else {
@@ -98,39 +132,42 @@ function setVazhdoButtonState(questionNumber) {
     }
 }
 
-// Funksioni për të shfaqur pyetjen tjetër
+/**
+ * Funktion zum Anzeigen der nächsten Frage im Fragebogen.
+ * @param {number} nextQuestionNumber - Die Nummer der nächsten Frage.
+ */
 function nextQuestion(nextQuestionNumber) {
     const currentQuestionNumber = nextQuestionNumber - 1;
 
-    // Kontrollo nëse pyetja aktuale kërkon zgjedhje
+    // Überprüfen, ob die aktuelle Frage eine Auswahl erfordert und ob eine Antwort ausgewählt wurde
     if (selectionRequiredQuestions.includes(currentQuestionNumber)) {
         const currentSelections = userResponses[`question${currentQuestionNumber}`];
         if (!currentSelections || currentSelections.length === 0) {
-            alert('Ju lutem zgjidhni një përgjigje para se të vazhdoni.');
+            alert('Ju lutem zgjidhni një përgjigje para se të vazhdoni.'); // "Bitte wählen Sie eine Antwort, bevor Sie fortfahren."
             return;
         }
     }
 
-    // Ruajtja e hyrjeve për pyetjet me fusha teksti
-    if (currentQuestionNumber === 5) {
+    // Speichern der Eingaben für Fragen mit Texteingabefeldern
+    if (currentQuestionNumber === 5) { // Frage 5: Name
         const nameInput = document.getElementById('nameInput').value.trim();
         if (nameInput === '') {
-            alert('Ju lutem vendosni emrin tuaj.');
+            alert('Ju lutem vendosni emrin tuaj.'); // "Bitte geben Sie Ihren Namen ein."
             return;
         }
         userResponses['name'] = nameInput;
     }
 
-    if (currentQuestionNumber === 6) {
+    if (currentQuestionNumber === 6) { // Frage 6: Alter
         const ageInput = document.getElementById('ageInput').value.trim();
         if (ageInput === '') {
-            alert('Ju lutem vendosni moshën tuaj.');
+            alert('Ju lutem vendosni moshën tuaj.'); // "Bitte geben Sie Ihr Alter ein."
             return;
         }
         userResponses['age'] = ageInput;
     }
 
-    // Fsheh pyetjen aktuale, përgjigjet dhe butonat e navigimit
+    // Verbergen der aktuellen Frage, Antworten und Navigationsbuttons
     const currentQuestion = document.getElementById(`question${currentQuestionNumber}`);
     const currentAnswers = document.getElementById(`answers${currentQuestionNumber}`);
     const currentNavButtons = document.getElementById(`nav-buttons${currentQuestionNumber}`);
@@ -139,7 +176,7 @@ function nextQuestion(nextQuestionNumber) {
     if (currentAnswers) currentAnswers.style.display = "none";
     if (currentNavButtons) currentNavButtons.style.display = "none";
 
-    // Shfaq pyetjen dhe përgjigjet e ardhshme
+    // Anzeigen der nächsten Frage, Antworten und Navigationsbuttons
     const nextQuestionElement = document.getElementById(`question${nextQuestionNumber}`);
     const nextAnswers = document.getElementById(`answers${nextQuestionNumber}`);
     const nextNavButtons = document.getElementById(`nav-buttons${nextQuestionNumber}`);
@@ -148,21 +185,24 @@ function nextQuestion(nextQuestionNumber) {
     if (nextAnswers) nextAnswers.style.display = "block";
     if (nextNavButtons) nextNavButtons.style.display = "flex";
 
-    // Vendos gjendjen e butonit "Vazhdo" për pyetjen e ardhshme
+    // Aktualisieren des Zustands des "Vazhdo" Buttons für die nächste Frage
     setVazhdoButtonState(nextQuestionNumber);
 
-    // Shkoni automatikisht lart
+    // Automatisches Scrollen nach oben zur nächsten Frage
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Printim për gjurmim në konzolë
-    console.log(`Te pyetja tjetër: ${nextQuestionNumber}`);
+    // Konsolenlog zur Nachverfolgung der Fragewechsel
+    console.log(`Te pyetja tjetër: ${nextQuestionNumber}`); // "Zur nächsten Frage: x"
 }
 
-// Funksioni për të kthyer te pyetja e mëparshme
+/**
+ * Funktion zum Navigieren zurück zur vorherigen Frage.
+ * @param {number} previousQuestionNumber - Die Nummer der vorherigen Frage.
+ */
 function navigateBack(previousQuestionNumber) {
     const currentQuestionNumber = previousQuestionNumber + 1;
 
-    // Fsheh pyetjen aktuale, përgjigjet dhe butonat e navigimit
+    // Verbergen der aktuellen Frage, Antworten und Navigationsbuttons
     const currentQuestion = document.getElementById(`question${currentQuestionNumber}`);
     const currentAnswers = document.getElementById(`answers${currentQuestionNumber}`);
     const currentNavButtons = document.getElementById(`nav-buttons${currentQuestionNumber}`);
@@ -171,7 +211,7 @@ function navigateBack(previousQuestionNumber) {
     if (currentAnswers) currentAnswers.style.display = "none";
     if (currentNavButtons) currentNavButtons.style.display = "none";
 
-    // Shfaq pyetjen dhe përgjigjet e mëparshme
+    // Anzeigen der vorherigen Frage, Antworten und Navigationsbuttons
     const previousQuestion = document.getElementById(`question${previousQuestionNumber}`);
     const previousAnswers = document.getElementById(`answers${previousQuestionNumber}`);
     const previousNavButtons = document.getElementById(`nav-buttons${previousQuestionNumber}`);
@@ -180,73 +220,91 @@ function navigateBack(previousQuestionNumber) {
     if (previousAnswers) previousAnswers.style.display = "block";
     if (previousNavButtons) previousNavButtons.style.display = "flex";
 
-    // Vendos gjendjen e butonit "Vazhdo" për pyetjen e mëparshme
+    // Aktualisieren des Zustands des "Vazhdo" Buttons für die vorherige Frage
     setVazhdoButtonState(previousQuestionNumber);
 
-    // Shkoni automatikisht lart
+    // Automatisches Scrollen nach oben zur vorherigen Frage
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Printim për gjurmim në konzolë
-    console.log(`Te pyetja e mëparshme: ${previousQuestionNumber}`);
+    // Konsolenlog zur Nachverfolgung des Fragenwechsels
+    console.log(`Te pyetja e mëparshme: ${previousQuestionNumber}`); // "Zur vorherigen Frage: x"
 }
 
-// Funksioni për të përditësuar vlerën e sensitivitetit
+/**
+ * Funktion zur Aktualisierung des Wertes der Sensitivität.
+ * @param {number} value - Der aktuelle Wert des Sensitivitäts-Sliders.
+ */
 function updateSensitivityValue(value) {
+    // Aktualisieren des angezeigten Wertes neben dem Slider
     document.getElementById("sensitivityValue").textContent = value;
-    // Ruajtja e vlerës së sensitivitetit
+    // Speichern des Wertes in den Benutzerantworten
     userResponses['sensitivity'] = value;
 }
 
-// Funksioni për të hapur kamerën dhe inicializuar FaceMesh
+/**
+ * Funktion zum Öffnen der Kamera und Initialisieren von FaceMesh.
+ * Verwendet Mediapipe und TensorFlow.js, um Gesichtslandmarken zu erkennen.
+ */
 async function openCamera() {
     const video = document.getElementById('cameraView');
     const overlay = document.getElementById('overlay');
     const ctx = overlay.getContext('2d');
 
     try {
-        // Merr stream-in e videos
+        // Zugriff auf den Videostream der Kamera (Frontkamera)
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "user" }
         });
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-            console.log("Meta të dhënat e videos u ngarkuan");
+            console.log("Meta-Daten des Videos wurden geladen.");
             video.play().then(() => {
-                console.log("Video po luan");
+                console.log("Video wird abgespielt.");
+                // Anzeige des Kameraconsumers
                 document.getElementById("cameraContainer").style.display = "block";
 
-                // Fsheh pyetësorin
+                // Verbergen des Fragebogens
                 document.getElementById("question-container").style.display = "none";
 
-                // Shfaq elementet pasi kamera është hapur
+                // Anzeigen der Overlays und Buttons
                 document.getElementById('topBorder').style.display = 'block';
                 document.getElementById('bottomBorder').style.display = 'block';
                 document.getElementById('buttonLogoContainer').style.display = 'flex';
                 document.getElementById('closeButton').style.display = 'block';
 
+                // Deaktivieren von Gesten während der Kameranutzung
                 disableGestures();
 
+                // Anpassen der Video-Overlay-Größe
                 resizeVideoOverlay(video, overlay);
+                // Initialisieren von FaceMesh für die Gesichtserkennung
                 initializeFaceMesh(video, overlay, ctx);
+                // Anpassung der Overlay-Größe bei Fensteränderung
                 window.addEventListener('resize', () => resizeVideoOverlay(video, overlay));
             }).catch(error => {
-                console.error("Gabim gjatë luajtjes së videos: ", error);
+                console.error("Fehler beim Abspielen des Videos: ", error);
             });
         };
     } catch (error) {
-        console.error("Gabim gjatë hapjes së kamerës: ", error);
-        alert("Kamera nuk mund të hapet. Ju lutem sigurohuni që keni lejuar aksesin.");
+        console.error("Fehler beim Öffnen der Kamera: ", error);
+        alert("Kamera konnte nicht geöffnet werden. Bitte stellen Sie sicher, dass Sie den Zugriff erlaubt haben.");
     }
 }
 
-// Funksioni për të përshtatur elementet e videos dhe overlay-it me madhësinë e ekranit
+/**
+ * Funktion zur Anpassung der Größe von Video und Overlay an die Bildschirmgröße.
+ * @param {HTMLVideoElement} video - Das Videoelement.
+ * @param {HTMLCanvasElement} overlay - Das Canvas-Overlay-Element.
+ */
 function resizeVideoOverlay(video, overlay) {
+    // Setzen der Overlay-Größe basierend auf der Videoauflösung
     overlay.width = video.videoWidth;
     overlay.height = video.videoHeight;
 
     const aspectRatio = video.videoWidth / video.videoHeight;
 
+    // Anpassen des Video- und Overlay-Stils basierend auf dem Seitenverhältnis
     if (window.innerWidth / window.innerHeight > aspectRatio) {
         video.style.width = '100%';
         video.style.height = 'auto';
@@ -260,42 +318,66 @@ function resizeVideoOverlay(video, overlay) {
     }
 }
 
-// Funksioni për të inicializuar FaceMesh dhe kamerën
+/**
+ * Funktion zur Initialisierung von FaceMesh und der Kamera.
+ * @param {HTMLVideoElement} video - Das Videoelement.
+ * @param {HTMLCanvasElement} overlay - Das Canvas-Overlay-Element.
+ * @param {CanvasRenderingContext2D} ctx - Der 2D-Zeichenkontext des Canvas.
+ */
 function initializeFaceMesh(video, overlay, ctx) {
+    // Erstellen einer neuen FaceMesh-Instanz mit den gewünschten Optionen
     const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
     faceMesh.setOptions({
-        maxNumFaces: 1,
+        maxNumFaces: 1, // Maximale Anzahl der zu erkennenden Gesichter
         refineLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minDetectionConfidence: 0.5, // Mindest-Erkennungswahrscheinlichkeit
+        minTrackingConfidence: 0.5   // Mindest-Tracking-Wahrscheinlichkeit
     });
+    // Festlegen der Callback-Funktion für Ergebnisse der Gesichtserkennung
     faceMesh.onResults(results => onFaceMeshResults(results, video, overlay, ctx));
 
+    // Starten der Kamera mit FaceMesh-Integration
     const camera = new Camera(video, {
         onFrame: async () => {
             await faceMesh.send({ image: video });
         }
     });
     camera.start();
-    console.log("FaceMesh u inicializua me sukses.");
+    console.log("FaceMesh wurde erfolgreich initialisiert.");
 }
 
-// Funksioni për të përpunuar rezultatet e FaceMesh
+/**
+ * Callback-Funktion zur Verarbeitung der FaceMesh-Ergebnisse.
+ * Zeichnet die Gesichtslandmarken auf das Canvas-Overlay.
+ * @param {Object} results - Die Ergebnisse von FaceMesh.
+ * @param {HTMLVideoElement} video - Das Videoelement.
+ * @param {HTMLCanvasElement} overlay - Das Canvas-Overlay-Element.
+ * @param {CanvasRenderingContext2D} ctx - Der 2D-Zeichenkontext des Canvas.
+ */
 function onFaceMeshResults(results, video, overlay, ctx) {
+    // Löschen des Canvas
     ctx.clearRect(0, 0, overlay.width, overlay.height);
+    // Zeichnen des aktuellen Videoframes auf das Canvas
     ctx.drawImage(video, 0, 0, overlay.width, overlay.height);
 
+    // Überprüfen, ob Gesichtslandmarken erkannt wurden
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-        const landmarks = results.multiFaceLandmarks[0];
-        drawLandmarks(landmarks, ctx);
+        const landmarks = results.multiFaceLandmarks[0]; // Nur das erste Gesicht
+        drawLandmarks(landmarks, ctx); // Zeichnen der Landmarken
     } else {
-        console.log("Asnjë fytyrë nuk u detektua.");
+        console.log("Kein Gesicht erkannt.");
     }
 }
 
-// Funksioni për të vizatuar pikat e fytyrës
+/**
+ * Funktion zum Zeichnen der Gesichtslandmarken auf das Canvas.
+ * @param {Array} landmarks - Die erkannten Gesichtslandmarken.
+ * @param {CanvasRenderingContext2D} ctx - Der 2D-Zeichenkontext des Canvas.
+ */
 function drawLandmarks(landmarks, ctx) {
-    ctx.fillStyle = "cyan";
+    ctx.fillStyle = "cyan"; // Farbe der Landmarkenpunkte
+
+    // Iterieren über alle Landmarken und Zeichnen eines kleinen Kreises an jeder Position
     landmarks.forEach((landmark) => {
         const x = landmark.x * overlay.width;
         const y = landmark.y * overlay.height;
@@ -305,50 +387,62 @@ function drawLandmarks(landmarks, ctx) {
     });
 }
 
-// Funksioni për të mbyllur kamerën
+/**
+ * Funktion zum Schließen der Kamera und Rückkehr zum Fragebogen.
+ * Stoppt den Videostream und zeigt den Fragebogen wieder an.
+ */
 function closeCamera() {
     const video = document.getElementById('cameraView');
     const stream = video.srcObject;
 
+    // Stoppen aller Tracks im Videostream
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
     }
-    video.srcObject = null;
-    document.getElementById("cameraContainer").style.display = "none";
+    video.srcObject = null; // Entfernen des Streams aus dem Videoelement
+    document.getElementById("cameraContainer").style.display = "none"; // Verbergen des Kameraconsumers
 
-    // Shfaq përsëri pyetësorin
+    // Wiederanzeige des Fragebogens
     document.getElementById("question-container").style.display = "block";
 
+    // Aktivieren von Gesten nach dem Schließen der Kamera
     enableGestures();
-    console.log("Kamera u mbyll.");
+    console.log("Kamera wurde geschlossen.");
 }
 
+/**
+ * Funktion zum Aufnehmen eines Fotos.
+ * Hier können Sie den bestehenden Code zum Erfassen und Speichern des Fotos einfügen.
+ */
 function takePhoto() {
-    // ... (Ihr bestehender Code zum Aufnehmen des Fotos)
+    // ... Ihr bestehender Code zum Aufnehmen des Fotos ...
 
-    // Setze das Bild im Ladebildschirm (falls Sie das Bild anzeigen)
+    // Beispiel: Bild im Ladebildschirm setzen (falls benötigt)
     // document.getElementById('loadingPhoto').src = dataURL;
 
-    // Verstecke den Kamera-Container
+    // Verbergen des Kameraconsumers
     document.getElementById("cameraContainer").style.display = "none";
 
-    // Zeige den Ladebildschirm
+    // Anzeigen des Ladebildschirms
     document.getElementById("loadingScreen").style.display = "flex";
 
-    // **Löse die Vibration für 3 Sekunden aus, falls unterstützt**
+    // Vibration auslösen für 3 Sekunden, falls unterstützt
     if (navigator.vibrate) {
         navigator.vibrate(3000);
     }
 
-    // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur ersten Frage weiterleiten
+    // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur nächsten Frage weiterleiten
     setTimeout(function() {
         document.getElementById("loadingScreen").style.display = "none";
-        closeCamera();
-        nextQuestion(2); // Weiter zur ersten Frage
+        closeCamera(); // Kamera schließen und zurückkehren zum Fragebogen
+        nextQuestion(2); // Zur nächsten Frage wechseln (Frage 2)
     }, 3500);
 }
 
-// Funksionet për të çaktivizuar dhe aktivizuar gjestet
+/**
+ * Funktionen zum Deaktivieren und Aktivieren von Gesten.
+ * Diese verhindern unerwünschte Gesten während der Kameranutzung (z.B. Scrollen, Zoomen).
+ */
 function disableGestures() {
     document.addEventListener('touchmove', preventTouch, { passive: false });
     document.addEventListener('gesturestart', preventGesture);
@@ -363,21 +457,24 @@ function enableGestures() {
     document.removeEventListener('gestureend', preventGesture);
 }
 
-// Funksionet ndihmëse për të parandaluar gjestet
+/**
+ * Hilfsfunktionen zur Verhinderung von Gesten.
+ * @param {Event} event - Das auslösende Ereignis.
+ */
 function preventTouch(event) {
-    event.preventDefault();  // Parandalon scroll me prekjen
+    event.preventDefault();  // Verhindert Scrollen durch Berührungen
 }
 
 function preventGesture(event) {
-    event.preventDefault();  // Parandalon gjestet si zoom
+    event.preventDefault();  // Verhindert Gesten wie Zoom
 }
 
-// Parandalon zoom-in me dy klikime
+// Verhindern des Zoom-Ins durch Doppelklick
 window.addEventListener('dblclick', function(event) {
     event.preventDefault();
 });
 
-// Parandalon zoom-in me kombinime tastiere (p.sh., Ctrl + Plus/Minus)
+// Verhindern des Zoom-Ins durch Tastenkombinationen (z.B. Ctrl + Plus/Minus)
 window.addEventListener('keydown', function(event) {
     if ((event.ctrlKey || event.metaKey) && 
         (event.key === '+' || event.key === '-' || event.key === '=' || event.key === '0')) {
@@ -385,14 +482,14 @@ window.addEventListener('keydown', function(event) {
     }
 });
 
-// Parandalon zoom-in me rrotullën e miut me tastin Ctrl
+// Verhindern des Zoom-Ins durch Mausrad mit gedrückter Ctrl-Taste
 window.addEventListener('wheel', function(event) {
     if (event.ctrlKey) {
         event.preventDefault();
     }
 }, { passive: false });
 
-// Parandalon gjestet e zoom-it në pajisjet me prekje
+// Verhindern von Zoom-Gesten auf Touch-Geräten
 document.addEventListener('gesturestart', function(event) {
     event.preventDefault();
 });
@@ -403,47 +500,69 @@ document.addEventListener('gestureend', function(event) {
     event.preventDefault();
 });
 
-// Funktion zum Abschließen des Fragebogens
+/**
+ * Funktion zum Abschließen des Fragebogens.
+ * Speichert die gesammelten Antworten und leitet zur Diagnose-Seite weiter.
+ */
 function finishQuestionnaire() {
+    // Überprüfen und Speichern des Alters
     const ageInput = document.getElementById('ageInput').value.trim();
     if (ageInput === '') {
-        alert('Ju lutem vendosni moshën tuaj.');
+        alert('Ju lutem vendosni moshën tuaj.'); // "Bitte geben Sie Ihr Alter ein."
         return;
     }
     userResponses['age'] = ageInput;
 
-    // Hol das Foto aus dem localStorage
+    // Abrufen des aufgenommenen Fotos aus dem localStorage
     const photoData = localStorage.getItem('capturedImage');
 
     if (!photoData) {
-        alert('Asnjë foto nuk u gjet. Ju lutem filloni pyetësorin nga fillimi.');
+        alert('Asnjë foto nuk u gjet. Ju lutem filloni pyetësorin nga fillimi.'); // "Kein Foto gefunden. Bitte starten Sie den Fragebogen neu."
         return;
     }
 
-    console.log('Pyetësori u përfundua. Të dhënat e mbledhura:', userResponses);
+    console.log('Der Fragebogen wurde abgeschlossen. Gesammelte Daten:', userResponses);
 
-    // Speichere die Antworten und das Foto im localStorage
+    // Speichern der Antworten und des Fotos im localStorage
     localStorage.setItem('userResponses', JSON.stringify(userResponses));
     localStorage.setItem('capturedImage', photoData);
 
-    // Generieren der Diagnose-Daten
+    // Generieren der Diagnose-Daten basierend auf den Antworten
     const diagnosisData = generateDiagnosis(userResponses);
     localStorage.setItem('diagnosisData', JSON.stringify(diagnosisData));
 
-    // Weiterleiten zur Diagnose-Seite
-    window.location.href = 'nextPage.html';
+    // Anzeigen des neuen Ladebildschirms
+    document.getElementById("loadingScreen2").style.display = "flex";
+
+    // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur Diagnose-Seite weiterleiten
+    setTimeout(function() {
+        // Optional: Hier können Sie Animationen hinzufügen oder den Ladebildschirm sanft ausblenden
+        document.getElementById("loadingScreen2").style.display = "none";
+        // Weiterleiten zur Diagnose-Seite
+        window.location.href = 'nextPage.html';
+    }, 3500);
 }
 
-// Funktion zum Generieren der Diagnose-Daten
+/**
+ * Funktion zur Generierung der Diagnose-Daten basierend auf den Benutzerantworten.
+ * @param {Object} userResponses - Die gesammelten Antworten des Benutzers.
+ * @returns {Object} - Das Diagnose-Datenobjekt.
+ */
 function generateDiagnosis(userResponses) {
     // Generierung der Basiseigenschaften
-    const skinHealthValue = getRandomValue(20, 70); // 20 bis 70%
+    const skinHealthValue = getRandomValue(20, 70); // Wert zwischen 20 und 70%
     const skinHealthStatus = getStatusText(skinHealthValue);
     
-    const textureValue = getRandomValue(20, 50); // 20 bis 50%
-    const textureStatus = 'Care Needed';
-    
-    // Definieren der spezifischen Probleme und deren Bereiche (ohne 'Mirembajte')
+    const textureValue = getRandomValue(20, 50); // Wert zwischen 20 und 50%
+    const textureStatus = 'Care Needed'; // Fester Status
+
+    /**
+     * Konfiguration der spezifischen Hautprobleme und deren Wertbereiche.
+     * Jeder Eintrag enthält:
+     * - selected: Ob das Problem ausgewählt wurde.
+     * - selectedRange: Der Wertebereich, wenn das Problem ausgewählt wurde.
+     * - defaultRange: Der Wertebereich, wenn das Problem nicht ausgewählt wurde.
+     */
     const problemsConfig = {
         'Akne': { selected: false, selectedRange: [11, 37], defaultRange: [52, 69] },
         'Poret': { selected: false, selectedRange: [14, 28], defaultRange: [52, 69] },
@@ -451,7 +570,7 @@ function generateDiagnosis(userResponses) {
         'Rrudhat': { selected: false, selectedRange: [24, 39], defaultRange: [52, 69] }
     };
     
-    // Überprüfen, welche Probleme ausgewählt wurden
+    // Überprüfen, welche Probleme ausgewählt wurden und entsprechend markieren
     if (userResponses['question3'] && userResponses['question3'].length > 0) {
         userResponses['question3'].forEach(problem => {
             if (problemsConfig.hasOwnProperty(problem)) {
@@ -460,18 +579,18 @@ function generateDiagnosis(userResponses) {
         });
     }
     
-    // Generierung der Werte für jedes Problem
+    // Initialisierung des Diagnose-Datenobjekts
     const diagnosisData = {
         skinHealthValue: skinHealthValue,
         skinHealthStatus: skinHealthStatus,
         textureValue: textureValue,
         textureStatus: textureStatus,
         diagnosisText: '', // Wird später generiert
-        elasticityValue: getRandomValue(20, 100), // Beispielbereich
-        barrierValue: getRandomValue(20, 100)    // Beispielbereich
+        elasticityValue: getRandomValue(20, 100), // Beispielbereich für Elastizität
+        barrierValue: getRandomValue(20, 100)    // Beispielbereich für Hautbarriere
     };
     
-    // Generierung der Werte für spezifische Probleme
+    // Generierung der Werte für spezifische Probleme basierend auf der Auswahl
     for (const [problem, config] of Object.entries(problemsConfig)) {
         if (config.selected) {
             diagnosisData[`${problem.toLowerCase()}Value`] = getRandomValue(config.selectedRange[0], config.selectedRange[1]);
@@ -480,45 +599,50 @@ function generateDiagnosis(userResponses) {
         }
     }
     
-    // Zusätzliche Logik für 'Shëndeti i Lëkurës' basierend auf 'Mirembajtje'
+    /**
+     * Zusätzliche Logik für 'Shëndeti i Lëkurës' basierend auf 'Mirembajtje'.
+     * Wenn 'Mirembajtje' (Pflege) ausgewählt ist, wird der Wert niedriger gesetzt.
+     */
     const isMirembajtjeSelected = userResponses['question3'] && userResponses['question3'].includes('Mirembajtje');
     if (isMirembajtjeSelected) {
-        diagnosisData.shendetiValue = getRandomValue(8, 27);
+        diagnosisData.shendetiValue = getRandomValue(8, 27); // Niedriger Wert bei ausgewählter Pflege
     } else {
-        diagnosisData.shendetiValue = getRandomValue(52, 69);
+        diagnosisData.shendetiValue = getRandomValue(52, 69); // Normaler Bereich ohne Pflege
     }
     diagnosisData.shendetiStatus = getStatusText(diagnosisData.shendetiValue);
     
-    // Generierung des Diagnose-Texts basierend auf Hauttyp und Problemstellungen
+    /**
+     * Generierung des Diagnose-Texts basierend auf Hauttyp und ausgewählten Problemstellungen.
+     */
     let diagnosisText = '';
     
-    // Integration des ausgewählten Hauttyps
+    // Integration des ausgewählten Hauttyps in den Diagnose-Text
     if (userResponses['question2'] && userResponses['question2'].length > 0) {
         const skinType = userResponses['question2'][0];
         switch (skinType) {
             case 'Thate':
-                diagnosisText += 'Sebumi i lëkurës tuaj është i thatë. ';
+                diagnosisText += 'Sebumi i lëkurës tuaj është i thatë. '; // "Ihre Haut ist trocken."
                 break;
             case 'Yndyrshme':
-                diagnosisText += 'Sebumi i lëkurës tuaj është i yndyrshëm. ';
+                diagnosisText += 'Sebumi i lëkurës tuaj është i yndyrshëm. '; // "Ihre Haut ist ölig."
                 break;
             case 'Kombinuar':
-                diagnosisText += 'Sebumi i lëkurës tuaj është i kombinuar. ';
+                diagnosisText += 'Sebumi i lëkurës tuaj është i kombinuar. '; // "Ihre Haut ist kombiniert."
                 break;
-            case 'Normal':
-                diagnosisText += 'Sebumi i lëkurës tuaj është normal. ';
+            case 'Normale':
+                diagnosisText += 'Sebumi i lëkurës tuaj është normale. '; // "Ihre Haut ist normal."
                 break;
             default:
-                diagnosisText += 'Sebumi i lëkurës tuaj është në gjendje të mirë. ';
+                diagnosisText += 'Sebumi i lëkurës tuaj është në gjendje të mirë. '; // "Ihre Haut ist in gutem Zustand."
         }
     }
     
-    // Integration der ausgewählten Problemstellungen
+    // Integration der ausgewählten Problemstellungen in den Diagnose-Text
     if (userResponses['question3'] && userResponses['question3'].length > 0) {
-        diagnosisText += 'Pas analizës, kemi vërejtur se keni problemet e mëposhtme: ';
-        diagnosisText += userResponses['question3'].join(', ').toLowerCase() + '. ';
+        diagnosisText += 'Pas analizës, kemi vërejtur se keni problemet e mëposhtme: '; // "Nach der Analyse haben wir festgestellt, dass Sie folgende Probleme haben:"
+        diagnosisText += userResponses['question3'].join(', ').toLowerCase() + '. '; // Auflistung der Probleme
         
-        // Auswahl einer zufälligen Diagnosevariante
+        // Auswahl einer zufälligen Diagnosevariante aus einem Array von Optionen
         const diagnosisVariants = [
             'Kemi identifikuar këto probleme si rezultat të faktorëve të ndryshëm të jetës së përditshme dhe ambientit. ',
             'Këto probleme mund të shkaktohen nga stresi, ushqimi, dhe mungesa e kujdesit adekuat të lëkurës. ',
@@ -530,72 +654,77 @@ function generateDiagnosis(userResponses) {
             'Nivelet e lartë të stresit dhe jetesa në mjedise të ndotura mund të kontribuojnë në këto çështje. ',
             'Mungesa e gjumit të mjaftueshëm dhe aktiviteti fizik i pamjaftueshëm mund të ndikojnë negativisht në shëndetin e lëkurës. ',
             'Produktet e tepërt për kujdesin e lëkurës mund të çojnë në irritim dhe probleme të tjera. '
-            // Shtoni më shumë variante sipas nevojës
+            // Weitere Varianten können hier hinzugefügt werden
         ];
         
+        // Zufällige Auswahl einer Diagnosevariante
         const randomIndex = Math.floor(Math.random() * diagnosisVariants.length);
         diagnosisText += diagnosisVariants[randomIndex];
     } else {
-        diagnosisText += 'Lëkura juaj duket e shëndetshme. Rekomandojmë të vazhdoni me rutinën tuaj të kujdesit të lëkurës. ';
+        diagnosisText += 'Lëkura juaj duket e shëndetshme. Rekomandojmë të vazhdoni me rutinën tuaj të kujdesit të lëkurës. '; // "Ihre Haut sieht gesund aus. Wir empfehlen, Ihre Hautpflegeroutine fortzusetzen."
     }
     
-    // Zusätzliche Diagnose-Informationen
-    diagnosisText += 'Është e rëndësishme të kuptoni se kujdesi adekuat për lëkurën mund të ndihmojë në parandalimin dhe përmirësimin e këtyre problemeve. ';
-    
+    // Zusätzliche Informationen zur Diagnose
+    diagnosisText += 'Është e rëndësishme të kuptoni se kujdesi adekuat për lëkurën mund të ndihmojë në parandalimin dhe përmirësimin e këtyre problemeve. '; // "Es ist wichtig zu verstehen, dass angemessene Hautpflege dazu beitragen kann, diese Probleme zu verhindern und zu verbessern."
+
+    // Speichern des generierten Diagnose-Texts im Diagnose-Datenobjekt
     diagnosisData.diagnosisText = diagnosisText;
     
     return diagnosisData;
 }
 
-// Funktion zum Anzeigen der Diagnose auf nextPage.html
+/**
+ * Funktion zur Anzeige der Diagnose auf der Diagnose-Seite (`nextPage.html`).
+ * Liest die gespeicherten Diagnose-Daten aus dem localStorage und zeigt sie an.
+ */
 function displayDiagnosis() {
-    // Prüfe, ob wir auf nextPage.html sind
+    // Überprüfen, ob wir auf der Diagnose-Seite sind
     if (window.location.pathname.endsWith('nextPage.html')) {
-        // Abrufen der Benutzerantworten
+        // Abrufen der Benutzerantworten aus dem localStorage
         const userResponses = JSON.parse(localStorage.getItem('userResponses'));
         if (!userResponses) {
-            alert('Asnjë përgjigje u gjet. Ju lutem filloni pyetësorin.');
+            alert('Asnjë përgjigje u gjet. Ju lutem filloni pyetësorin.'); // "Keine Antworten gefunden. Bitte starten Sie den Fragebogen neu."
             return;
         }
 
-        const userName = userResponses['name'];
-        const userAge = userResponses['age'];
-        const skinTypeSelections = userResponses['question2'] || [];
-        const problemSelections = userResponses['question3'] || [];
+        const userName = userResponses['name']; // Benutzername
+        const userAge = userResponses['age'];   // Benutzeralter
+        const skinTypeSelections = userResponses['question2'] || []; // Hauttyp-Auswahl
+        const problemSelections = userResponses['question3'] || [];  // Hautprobleme-Auswahl
 
-        // Anzeige von Name und Alter
+        // Anzeige von Name und Alter auf der Diagnose-Seite
         const userNameElement = document.getElementById('userName');
         const userAgeElement = document.getElementById('userAge');
         if (userNameElement) userNameElement.textContent = userName;
         if (userAgeElement) userAgeElement.textContent = userAge;
 
-        // Abrufen der Diagnose-Daten aus localStorage
+        // Abrufen der Diagnose-Daten aus dem localStorage
         const diagnosisData = JSON.parse(localStorage.getItem('diagnosisData'));
         if (!diagnosisData) {
-            alert('Asnjë diagnozë u gjet. Ju lutem filloni pyetësorin.');
+            alert('Asnjë diagnozë u gjet. Ju lutem filloni pyetësorin.'); // "Keine Diagnose gefunden. Bitte starten Sie den Fragebogen neu."
             return;
         }
 
-         // Anzeige der Diagnose-Daten
-         const diagnosisTextElement = document.getElementById('diagnosisText');
-         if (diagnosisTextElement) {
-             diagnosisTextElement.textContent = diagnosisData.diagnosisText;
-             diagnosisTextElement.style.textAlign = 'left'; // Links-Ausrichtung setzen
-             // Optional: Weitere Stile setzen, falls nötig
-             diagnosisTextElement.style.fontSize = '1rem';
-             diagnosisTextElement.style.color = '#333';
-             diagnosisTextElement.style.margin = '20px';
-             diagnosisTextElement.style.lineHeight = '1.6';
-             diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
-         }
-         
-        // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës'
+        // Anzeige des Diagnose-Texts
+        const diagnosisTextElement = document.getElementById('diagnosisText');
+        if (diagnosisTextElement) {
+            diagnosisTextElement.textContent = diagnosisData.diagnosisText;
+            diagnosisTextElement.style.textAlign = 'left'; // Links ausrichten
+            // Optional: Weitere Stile setzen, falls nötig
+            diagnosisTextElement.style.fontSize = '1rem';
+            diagnosisTextElement.style.color = '#333';
+            diagnosisTextElement.style.margin = '20px';
+            diagnosisTextElement.style.lineHeight = '1.6';
+            diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
+        }
+        
+        // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës' (Hautgesundheit)
         const shendetiValueElement = document.getElementById('shendetiValue');
         const shendetiStatusElement = document.getElementById('shendetiStatus');
         if (shendetiValueElement) shendetiValueElement.textContent = diagnosisData.shendetiValue;
         if (shendetiStatusElement) shendetiStatusElement.textContent = diagnosisData.shendetiStatus;
 
-        // Anzeige der Diagrammwerte für andere Probleme
+        // Anzeige der Diagrammwerte für andere Hautprobleme
         const poretValueElement = document.getElementById('poretValue');
         const poretStatusElement = document.getElementById('poretStatus');
         if (poretValueElement) poretValueElement.textContent = diagnosisData.poretValue;
@@ -628,7 +757,7 @@ function displayDiagnosis() {
             shendetiCircle.style.background = `conic-gradient(black ${diagnosisData.shendetiValue}%, #F6F6F7 0%)`;
         }
 
-        // Aktualisieren der progress-circle Hintergrundfarben für andere Probleme
+        // Aktualisieren der progress-circle Hintergrundfarben für andere Hautprobleme
         const poretCircle = document.querySelector(`.progress-circle[data-category="poret"]`);
         if (poretCircle) {
             poretCircle.dataset.percentage = diagnosisData.poretValue;
@@ -659,7 +788,7 @@ function displayDiagnosis() {
             akneCircle.style.background = `conic-gradient(black ${diagnosisData.akneValue}%, #F6F6F7 0%)`;
         }
 
-        // Setzen der Fortschrittsbalken für Elasticity und Barrier
+        // Setzen der Fortschrittsbalken für Elastizität und Barriere
         const elasticityBar = document.getElementById('elasticityBar');
         if (elasticityBar) {
             elasticityBar.style.width = `${diagnosisData.elasticityValue}%`;
