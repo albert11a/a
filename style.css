@@ -19,10 +19,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    h6 {
-        text-align: center;
-    }
-    
+}
+
+/* Optional: Globale Stilregel für h6, falls gewünscht */
+h6 {
+    /* text-align: center; Entfernen oder ändern */
+    text-align: left; /* Standardmäßig linksbündig */
 }
 
 html, body {
@@ -368,7 +370,7 @@ button {
     justify-content: space-between;
     padding: 10px 20px;
 }
-  
+
 .nav-button {
     padding: 10px 20px;
     font-size: 16px;
@@ -428,11 +430,7 @@ button {
 
 
 
-
-/* ... (Dein vorheriger CSS-Code bleibt unverändert) */
-
 /* Stile für die Diagnose-Seite */
-
 
 /* Container für Ergebnisse */
 .result-container {
@@ -442,7 +440,6 @@ button {
     gap: 15px;
     margin-top: 20px;
     text-align: left;
-    
 }
 
 .row {
@@ -565,52 +562,88 @@ small {
     }
 }
 
+
+/* Sicherstellen, dass alle h6 in .diagnosis-box linksbündig sind */
+.diagnosis-box h6 {
+    text-align: left;
+}
+
+/* Loading Screen Styles */
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    z-index: 2000;
+    display: flex;
+    justify-content: center; /* Zentriert den Inhalt horizontal */
+    align-items: center;     /* Zentriert den Inhalt vertikal */
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;   /* Ordnet die Elemente untereinander an */
+    align-items: center;      /* Zentriert die Elemente horizontal */
+}
+
+.loading-content .spinner {
+    width: 50px;              /* Passen Sie die Größe nach Wunsch an */
+    height: 50px;             /* Passen Sie die Größe nach Wunsch an */
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #000000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;      /* Abstand zum Text darunter */
+}
+
+.loading-content h6 {
+    font-size: 1rem;
+    color: #333;
+    font-family: "Harmonia Sans", sans-serif;
+    text-align: center;       /* Text zentrieren */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Grundlegendes Styling für den Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px; /* Reduziertes Padding für einen kleineren Header */
+    height: 60px; /* Feste Höhe für den Header */
+    box-sizing: border-box; /* Sicherstellen, dass Padding zur Höhe gehört */
+    margin-bottom: 20px; /* Abstand unterhalb des Headers */
+}
+/* Styling für das Logo */
+.logo {
+    height: 40px; /* Reduzierte Höhe des Logos */
+    /* Weitere Styling-Eigenschaften nach Bedarf */
+}
+
+/* Styling für den Rückwärtspfeil */
+.back-arrow {
+    font-size: 20px; /* Kleinere Schriftgröße für den Pfeil */
+    text-decoration: none;
+    color: #000; /* Farbe des Pfeils */
+    /* Optional: Hover-Effekt */
+}
+
+.back-arrow:hover {
+    color: #555;
+}
+
 /* Stil für den Diagnose-Text */
 #diagnosisText {
     font-size: 1rem;
     color: #333;
-    margin: 20px;
-    line-height: 1.6;
-    text-align: center;
-    font-family: "Harmonia Sans", sans-serif;
-}
-
-.answer-box {
-    background-color: #F6F6F7;
-    padding: 20px;
     margin: 20px 0;
-    border-radius: 10px;
-    min-height: 150px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    line-height: 1.6;
+    text-align: left; /* Links-Ausrichtung */
     font-family: "Harmonia Sans", sans-serif;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    
 }
-
-/* Allgemeine Stile für .answer-box */
-.answer-box {
-    /* ... andere Stile ... */
-    /* Entfernen Sie text-align: center; wenn vorhanden */
-    /* text-align: center; */
-}
-
-/* Spezifische Stile für die Diagnosebox */
-.answer-box.diagnosis-box {
-    text-align: left;
-    align-items: flex-start;
-}
-
-.answer-box.diagnosis-box h3,
-.answer-box.diagnosis-box h6,
-.answer-box.diagnosis-box p {
-    text-align: left;
-}
-
-#diagnosisText {
-    text-align: left !important;
-}
-
