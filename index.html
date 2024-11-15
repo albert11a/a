@@ -16,6 +16,13 @@
 </head>
 <body>
 
+    <header class="header">
+        <a href="https://mk.lifeskin-ks.com/" class="back-arrow" id="backArrow">
+            &#8592;
+        </a>
+        <img src="logo2.gif" alt="Logo" class="logo">
+    </header>
+
     <!-- Kutia e Pyetjeve dhe Përgjigjeve -->
     <div id="question-container">
 
@@ -107,7 +114,7 @@
                 <h6>Deshironi vetem nje mirembajte te lekures tuaj.</h6>
             </div>
         </div>
-        
+
         <!-- Pyetja 4: Sensitiviteti -->
         <div class="question-box" id="question4" style="display: none;">
             <h3>Sensitiviteti</h3>
@@ -189,5 +196,15 @@
         <!-- Butoni për Mbyllje -->
         <button onclick="closeCamera()" id="closeButton" class="close-button">Mbyll</button>
     </div>
+
+<!-- Loading Screen -->
+<div id="loadingScreen" style="display: none;">
+    <div class="loading-content">
+        <!-- Loading symbol -->
+        <div class="spinner"></div>
+        <!-- Nachricht -->
+        <h6>Faleminderit për skanimin tuaj</h6>
+    </div>
+</div>
 </body>
 </html>
