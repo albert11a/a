@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
+    
+ <!-- Shopify Buy Button SDK -->
+<script src="https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js"></script>
+
     <meta charset="UTF-8">
     <title>Analiza e Lëkurës - Rezultatet</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,6 +78,39 @@
             </div>
         </div>
     </div>
+  
+<!-- Produktvorschläge -->
+<div id="product-recommendations" class="product-recommendations">
+    <h2>Empfohlene Produkte für Sie</h2>
+    <div id="products-container" class="products-container">
+        <!-- Produkte werden hier dynamisch eingefügt -->
+    </div>
+</div>
+
+
+<!-- Collapsible Tabs -->
+<div class="collapsible-tabs">
+    <button class="collapsible">Effekte</button>
+    <div class="content">
+        <p>Informationen zu den Effekten der Produkte.</p>
+    </div>
+
+    <button class="collapsible">Anwendung</button>
+    <div class="content">
+        <p>Wie man die Produkte richtig anwendet.</p>
+    </div>
+
+    <button class="collapsible">Beschreibung</button>
+    <div class="content">
+        <p>Kurzbeschreibung der Produkte.</p>
+    </div>
+</div>
+
+<!-- Sticky Bar -->
+<div class="sticky-bar">
+    <div id="total-price">Gesamtpreis: 0€</div>
+    <button id="add-to-cart-button" class="add-to-cart-button">In den Warenkorb</button>
+</div>
 
     <!-- JavaScript -->
     <script src="script.js"></script>
