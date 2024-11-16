@@ -703,3 +703,54 @@ small {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+
+
+/* Schwarzer Button mit abgerundeten Ecken und weißer Schrift */
+.instruction-button {
+    background-color: black; /* Schwarzer Hintergrund */
+    color: white;            /* Weißer Text */
+    border: none;            /* Kein Rand */
+    border-radius: 10px;     /* Abgerundete Ecken */
+    padding: 12px 20px;      /* Innenabstand */
+    font-size: 12px;         /* Schriftgröße */
+    cursor: pointer;         /* Hand-Cursor bei Hover */
+    transition: background-color 0.3s ease; /* Sanfter Übergang */
+    height: 50px;  
+}
+
+
+.input-container {
+    margin: 0 auto; /* Zentriert die Eingabebox */
+    padding: 0; /* Keine zusätzlichen Polsterungen */
+}
+input {
+    margin: 0; /* Entfernt zusätzliche Abstände */
+}
+/* Einheitliche Höhe für alle Frage-Boxen */
+.question-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Gleiche Ausrichtung für alle Fragen */
+    min-height: 150px; /* Einheitliche Mindesthöhe */
+}
+
+/* Anpassung der Input-Felder in Fragen 5 und 6 */
+.input-container {
+    width: 100%;
+    text-align: center;
+}
+
+input[type="text"] {
+    margin: 0; /* Entfernt unnötige Abstände */
+    padding: 12px; /* Einheitliche Innenabstände */
+    box-sizing: border-box; /* Berücksichtigt Padding bei der Breite */
+    font-size: 16px;
+}
+
+/* Entfernt unerwünschte Abstände bei Antwort-Feldern */
+#answers5,
+#answers6 {
+    margin-top: 0;
+    padding: 0;
+}
