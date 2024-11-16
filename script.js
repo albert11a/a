@@ -1,14 +1,17 @@
-// Objekt zur Speicherung der Benutzerantworten
+// === Benutzerantworten und Status ===
 const userResponses = {};
+let activeCameraStream = null; // Speichert den aktiven Kamerastream
+let isFaceMeshLoaded = false;  // Überprüft, ob die Gesichtslandmarken geladen sind
 
-/**
- * Liste der Fragen, die eine Auswahl erfordern.
- * Diese Fragen müssen eine oder mehrere Antworten vom Benutzer erhalten, bevor er fortfahren kann.
+/*** Liste der Fragen, die eine Auswahl erfordern.
+ * * Diese Fragen müssen eine oder mehrere Antworten vom Benutzer erhalten, bevor er fortfahren kann.
  */
 const selectionRequiredQuestions = [2, 3];
 
+// === Hilfsfunktionen ===
+
 /**
- * Hilfsfunktion zur Generierung eines zufälligen Wertes innerhalb eines angegebenen Bereichs.
+ * Generiert einen zufälligen Ganzzahlwert zwischen min und max (inklusive).
  * @param {number} min - Der minimale Wert (inklusive).
  * @param {number} max - Der maximale Wert (inklusive).
  * @returns {number} - Ein zufälliger Ganzzahlwert zwischen min und max.
@@ -18,7 +21,7 @@ function getRandomValue(min, max) {
 }
 
 /**
- * Hilfsfunktion zur Bestimmung des Status basierend auf einem numerischen Wert.
+ * Bestimmt den Status basierend auf einem numerischen Wert.
  * @param {number} value - Der Wert, der bewertet werden soll.
  * @returns {string} - Der Status als Text ("Care Needed", "Normal", "Good").
  */
@@ -32,19 +35,22 @@ function getStatusText(value) {
     }
 }
 
+// === Fragebogen-Management ===
+
 /**
- * Funktion zum Starten des Fragebogens.
- * Sie zeigt die erste Frage sowie die zugehörigen Antworten und Navigationsbuttons an.
+ * Startet den Fragebogen, indem die erste Frage und die zugehörigen Elemente angezeigt werden.
  */
 function startQuestionnaire() {
-    // Anzeige des gesamten Fragecontainers
-    document.getElementById("question-container").style.display = "block";
-    // Anzeige der ersten Frage
-    document.getElementById("question1").style.display = "block";
-    // Anzeige der Antwortmöglichkeiten zur ersten Frage
-    document.getElementById("answers1").style.display = "block";
-    // Anzeige der Navigationsbuttons zur ersten Frage
-    document.getElementById("nav-buttons1").style.display = "flex";
+    const questionContainer = document.getElementById("question-container");
+    const firstQuestion = document.getElementById("question1");
+    const firstAnswers = document.getElementById("answers1");
+    const firstNavButtons = document.getElementById("nav-buttons1");
+
+    // Anzeige des gesamten Fragecontainers und der ersten Frage
+    questionContainer.style.display = "block";
+    firstQuestion.style.display = "block";
+    firstAnswers.style.display = "block";
+    firstNavButtons.style.display = "flex";
 }
 
 /**
@@ -60,29 +66,24 @@ window.onload = function() {
 };
 
 /**
- * Funktion zum Umschalten der Auswahl von Antwortboxen.
+ * Umschaltet die Auswahl von Antwortboxen und speichert die Auswahl.
  * @param {HTMLElement} element - Das angeklickte Antwortfeld.
  */
 function toggleSelection(element) {
-    // Bestimmen der Frage-ID basierend auf dem übergeordneten Element
     const questionId = element.parentElement.id;
-    const questionNumber = parseInt(questionId.replace('answers', ''));
-    
+    const questionNumber = parseInt(questionId.replace('answers', ''), 10);
+
     // Überprüfen, ob die aktuelle Frage eine Auswahl erfordert
     if (!selectionRequiredQuestions.includes(questionNumber)) return;
 
-    // Umschalten der 'selected' Klasse zur visuellen Hervorhebung
+    // Umschalten der 'selected' Klasse
     element.classList.toggle('selected');
 
     // Sammeln aller ausgewählten Antworten innerhalb der aktuellen Frage
     const selectedAnswers = element.parentElement.querySelectorAll('.answer-box.selected');
     const selectedTexts = Array.from(selectedAnswers).map(box => {
         const heading = box.querySelector('.answer-heading');
-        if (heading) {
-            return heading.innerText;
-        } else {
-            return box.querySelector('input').value.trim();
-        }
+        return heading ? heading.innerText : box.querySelector('input').value.trim();
     });
 
     // Speichern der ausgewählten Antworten im userResponses Objekt
@@ -93,11 +94,10 @@ function toggleSelection(element) {
 }
 
 /**
- * Funktion zur Einstellung des Zustands der Navigationsbuttons ("Vazhdo" und "Mbrapa").
+ * Aktualisiert den Zustand der Navigationsbuttons basierend auf der Auswahl.
  * @param {number} questionNumber - Die Nummer der aktuellen Frage.
  */
 function setVazhdoButtonState(questionNumber) {
-    // Zugriff auf die Navigationsbuttons der aktuellen Frage
     const navButtons = document.getElementById(`nav-buttons${questionNumber}`);
     if (!navButtons) return;
 
@@ -105,35 +105,29 @@ function setVazhdoButtonState(questionNumber) {
     const backButton = navButtons.querySelector('.left'); // "Mbrapa" (Zurück) Button
 
     // Für Frage 1 gibt es keinen "Vazhdo" Button
-    if (questionNumber === 1) {
-        return;
-    }
+    if (questionNumber === 1) return;
 
     // Überprüfen, ob die aktuelle Frage eine Auswahl erfordert
     if (selectionRequiredQuestions.includes(questionNumber)) {
-        // Überprüfen, ob mindestens eine Antwort ausgewählt wurde
-        const selected = userResponses[`question${questionNumber}`] && userResponses[`question${questionNumber}`].length > 0;
+        const selected = userResponses[`question${questionNumber}`]?.length > 0;
 
-        if (selected) {
-            vazhdoButton.classList.remove('disabled'); // Aktivieren des "Vazhdo" Buttons
-        } else {
-            vazhdoButton.classList.add('disabled'); // Deaktivieren des "Vazhdo" Buttons
-        }
+        // Aktivieren oder Deaktivieren des "Vazhdo" Buttons
+        vazhdoButton.classList.toggle('disabled', !selected);
     } else {
-        // Für Fragen, die keine Auswahl erfordern, den "Vazhdo" Button aktivieren
+        // Für Fragen ohne Auswahlanforderung den "Vazhdo" Button aktivieren
         vazhdoButton.classList.remove('disabled');
     }
 
     // Spezieller Fall für Frage 2: Den "Mbrapa" Button deaktivieren
-    if (questionNumber === 2) {
-        if (backButton) backButton.classList.add('disabled');
-    } else {
-        if (backButton) backButton.classList.remove('disabled');
+    if (questionNumber === 2 && backButton) {
+        backButton.classList.add('disabled');
+    } else if (backButton) {
+        backButton.classList.remove('disabled');
     }
 }
 
 /**
- * Funktion zum Anzeigen der nächsten Frage im Fragebogen.
+ * Zeigt die nächste Frage im Fragebogen an.
  * @param {number} nextQuestionNumber - Die Nummer der nächsten Frage.
  */
 function nextQuestion(nextQuestionNumber) {
@@ -196,7 +190,7 @@ function nextQuestion(nextQuestionNumber) {
 }
 
 /**
- * Funktion zum Navigieren zurück zur vorherigen Frage.
+ * Navigiert zurück zur vorherigen Frage.
  * @param {number} previousQuestionNumber - Die Nummer der vorherigen Frage.
  */
 function navigateBack(previousQuestionNumber) {
@@ -230,20 +224,24 @@ function navigateBack(previousQuestionNumber) {
     console.log(`Te pyetja e mëparshme: ${previousQuestionNumber}`); // "Zur vorherigen Frage: x"
 }
 
+// === Sensitivitätsregelung ===
+
 /**
- * Funktion zur Aktualisierung des Wertes der Sensitivität.
+ * Aktualisiert den angezeigten Wert der Sensitivität und speichert ihn.
  * @param {number} value - Der aktuelle Wert des Sensitivitäts-Sliders.
  */
 function updateSensitivityValue(value) {
-    // Aktualisieren des angezeigten Wertes neben dem Slider
-    document.getElementById("sensitivityValue").textContent = value;
-    // Speichern des Wertes in den Benutzerantworten
+    const sensitivityValueElement = document.getElementById("sensitivityValue");
+    if (sensitivityValueElement) {
+        sensitivityValueElement.textContent = value;
+    }
     userResponses['sensitivity'] = value;
 }
 
+// === Kamerafunktionen ===
+
 /**
- * Funktion zum Öffnen der Kamera und Initialisieren von FaceMesh.
- * Verwendet Mediapipe und TensorFlow.js, um Gesichtslandmarken zu erkennen.
+ * Öffnet die Kamera und initialisiert FaceMesh zur Gesichtserkennung.
  */
 async function openCamera() {
     const video = document.getElementById('cameraView');
@@ -251,36 +249,28 @@ async function openCamera() {
     const ctx = overlay.getContext('2d');
 
     try {
-        // Zugriff auf den Videostream der Kamera (Frontkamera)
+        // Zugriff auf die Video-Stream der Kamera
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "user" }
         });
         video.srcObject = stream;
+        activeCameraStream = stream;
 
         video.onloadedmetadata = () => {
-            console.log("Meta-Daten des Videos wurden geladen.");
+            console.log("Meta-Daten der Video geladen");
             video.play().then(() => {
-                console.log("Video wird abgespielt.");
-                // Anzeige des Kameraconsumers
+                console.log("Video wird abgespielt");
                 document.getElementById("cameraContainer").style.display = "block";
-
                 // Verbergen des Fragebogens
                 document.getElementById("question-container").style.display = "none";
-
-                // Anzeigen der Overlays und Buttons
+                // Anzeigen relevanter UI-Elemente
                 document.getElementById('topBorder').style.display = 'block';
                 document.getElementById('bottomBorder').style.display = 'block';
                 document.getElementById('buttonLogoContainer').style.display = 'flex';
                 document.getElementById('closeButton').style.display = 'block';
-
-                // Deaktivieren von Gesten während der Kameranutzung
                 disableGestures();
-
-                // Anpassen der Video-Overlay-Größe
                 resizeVideoOverlay(video, overlay);
-                // Initialisieren von FaceMesh für die Gesichtserkennung
                 initializeFaceMesh(video, overlay, ctx);
-                // Anpassung der Overlay-Größe bei Fensteränderung
                 window.addEventListener('resize', () => resizeVideoOverlay(video, overlay));
             }).catch(error => {
                 console.error("Fehler beim Abspielen des Videos: ", error);
@@ -288,23 +278,20 @@ async function openCamera() {
         };
     } catch (error) {
         console.error("Fehler beim Öffnen der Kamera: ", error);
-        alert("Kamera konnte nicht geöffnet werden. Bitte stellen Sie sicher, dass Sie den Zugriff erlaubt haben.");
+        alert("Kamera kann nicht geöffnet werden. Bitte stellen Sie sicher, dass Sie den Zugriff erlaubt haben.");
     }
 }
 
 /**
- * Funktion zur Anpassung der Größe von Video und Overlay an die Bildschirmgröße.
- * @param {HTMLVideoElement} video - Das Videoelement.
- * @param {HTMLCanvasElement} overlay - Das Canvas-Overlay-Element.
+ * Passt die Größe von Video und Overlay an die Fenstergröße an.
+ * @param {HTMLVideoElement} video - Das Videoelement der Kamera.
+ * @param {HTMLCanvasElement} overlay - Das Overlay-Canvas.
  */
 function resizeVideoOverlay(video, overlay) {
-    // Setzen der Overlay-Größe basierend auf der Videoauflösung
     overlay.width = video.videoWidth;
     overlay.height = video.videoHeight;
-
     const aspectRatio = video.videoWidth / video.videoHeight;
 
-    // Anpassen des Video- und Overlay-Stils basierend auf dem Seitenverhältnis
     if (window.innerWidth / window.innerHeight > aspectRatio) {
         video.style.width = '100%';
         video.style.height = 'auto';
@@ -319,65 +306,60 @@ function resizeVideoOverlay(video, overlay) {
 }
 
 /**
- * Funktion zur Initialisierung von FaceMesh und der Kamera.
- * @param {HTMLVideoElement} video - Das Videoelement.
- * @param {HTMLCanvasElement} overlay - Das Canvas-Overlay-Element.
- * @param {CanvasRenderingContext2D} ctx - Der 2D-Zeichenkontext des Canvas.
+ * Initialisiert FaceMesh und startet die Gesichtserkennung.
+ * @param {HTMLVideoElement} video - Das Videoelement der Kamera.
+ * @param {HTMLCanvasElement} overlay - Das Overlay-Canvas.
+ * @param {CanvasRenderingContext2D} ctx - Der Zeichenkontext des Overlays.
  */
 function initializeFaceMesh(video, overlay, ctx) {
-    // Erstellen einer neuen FaceMesh-Instanz mit den gewünschten Optionen
     const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
+
     faceMesh.setOptions({
-        maxNumFaces: 1, // Maximale Anzahl der zu erkennenden Gesichter
+        maxNumFaces: 1,
         refineLandmarks: true,
-        minDetectionConfidence: 0.5, // Mindest-Erkennungswahrscheinlichkeit
-        minTrackingConfidence: 0.5   // Mindest-Tracking-Wahrscheinlichkeit
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
     });
-    // Festlegen der Callback-Funktion für Ergebnisse der Gesichtserkennung
+
     faceMesh.onResults(results => onFaceMeshResults(results, video, overlay, ctx));
 
-    // Starten der Kamera mit FaceMesh-Integration
     const camera = new Camera(video, {
         onFrame: async () => {
             await faceMesh.send({ image: video });
         }
     });
     camera.start();
-    console.log("FaceMesh wurde erfolgreich initialisiert.");
+
+    console.log("FaceMesh erfolgreich initialisiert.");
 }
 
 /**
- * Callback-Funktion zur Verarbeitung der FaceMesh-Ergebnisse.
- * Zeichnet die Gesichtslandmarken auf das Canvas-Overlay.
+ * Verarbeitet die Ergebnisse von FaceMesh und zeichnet die Gesichtslandmarken.
  * @param {Object} results - Die Ergebnisse von FaceMesh.
- * @param {HTMLVideoElement} video - Das Videoelement.
- * @param {HTMLCanvasElement} overlay - Das Canvas-Overlay-Element.
- * @param {CanvasRenderingContext2D} ctx - Der 2D-Zeichenkontext des Canvas.
+ * @param {HTMLVideoElement} video - Das Videoelement der Kamera.
+ * @param {HTMLCanvasElement} overlay - Das Overlay-Canvas.
+ * @param {CanvasRenderingContext2D} ctx - Der Zeichenkontext des Overlays.
  */
 function onFaceMeshResults(results, video, overlay, ctx) {
-    // Löschen des Canvas
     ctx.clearRect(0, 0, overlay.width, overlay.height);
-    // Zeichnen des aktuellen Videoframes auf das Canvas
     ctx.drawImage(video, 0, 0, overlay.width, overlay.height);
 
-    // Überprüfen, ob Gesichtslandmarken erkannt wurden
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-        const landmarks = results.multiFaceLandmarks[0]; // Nur das erste Gesicht
-        drawLandmarks(landmarks, ctx); // Zeichnen der Landmarken
+        const landmarks = results.multiFaceLandmarks[0];
+        drawLandmarks(landmarks, ctx, overlay);
     } else {
         console.log("Kein Gesicht erkannt.");
     }
 }
 
 /**
- * Funktion zum Zeichnen der Gesichtslandmarken auf das Canvas.
- * @param {Array} landmarks - Die erkannten Gesichtslandmarken.
- * @param {CanvasRenderingContext2D} ctx - Der 2D-Zeichenkontext des Canvas.
+ * Zeichnet die Gesichtslandmarken auf das Overlay.
+ * @param {Array} landmarks - Die Landmarks des Gesichts.
+ * @param {CanvasRenderingContext2D} ctx - Der Zeichenkontext des Overlays.
+ * @param {HTMLCanvasElement} overlay - Das Overlay-Canvas.
  */
-function drawLandmarks(landmarks, ctx) {
-    ctx.fillStyle = "cyan"; // Farbe der Landmarkenpunkte
-
-    // Iterieren über alle Landmarken und Zeichnen eines kleinen Kreises an jeder Position
+function drawLandmarks(landmarks, ctx, overlay) {
+    ctx.fillStyle = "cyan";
     landmarks.forEach((landmark) => {
         const x = landmark.x * overlay.width;
         const y = landmark.y * overlay.height;
@@ -387,61 +369,110 @@ function drawLandmarks(landmarks, ctx) {
     });
 }
 
+// === Kamerabeschluss ===
+
 /**
- * Funktion zum Schließen der Kamera und Rückkehr zum Fragebogen.
- * Stoppt den Videostream und zeigt den Fragebogen wieder an.
+ * Schließt die Kamera und zeigt den Fragebogen wieder an.
  */
 function closeCamera() {
     const video = document.getElementById('cameraView');
     const stream = video.srcObject;
 
-    // Stoppen aller Tracks im Videostream
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
     }
-    video.srcObject = null; // Entfernen des Streams aus dem Videoelement
-    document.getElementById("cameraContainer").style.display = "none"; // Verbergen des Kameraconsumers
-
-    // Wiederanzeige des Fragebogens
-    document.getElementById("question-container").style.display = "block";
-
-    // Aktivieren von Gesten nach dem Schließen der Kamera
-    enableGestures();
-    console.log("Kamera wurde geschlossen.");
-}
-
-/**
- * Funktion zum Aufnehmen eines Fotos.
- * Hier können Sie den bestehenden Code zum Erfassen und Speichern des Fotos einfügen.
- */
-function takePhoto() {
-    // ... Ihr bestehender Code zum Aufnehmen des Fotos ...
-
-    // Beispiel: Bild im Ladebildschirm setzen (falls benötigt)
-    // document.getElementById('loadingPhoto').src = dataURL;
-
-    // Verbergen des Kameraconsumers
+    video.srcObject = null;
+    activeCameraStream = null;
     document.getElementById("cameraContainer").style.display = "none";
 
-    // Anzeigen des Ladebildschirms
-    document.getElementById("loadingScreen").style.display = "flex";
+    // Anzeige des Fragebogens
+    document.getElementById("question-container").style.display = "block";
 
-    // Vibration auslösen für 3 Sekunden, falls unterstützt
-    if (navigator.vibrate) {
-        navigator.vibrate(3000);
+    enableGestures();
+
+    console.log("Kamera geschlossen.");
+}
+
+// === Fotoaufnahme ===
+
+/**
+ * Nimmt ein Foto auf, zeigt den Ladebildschirm und leitet nach 3,5 Sekunden zur nächsten Frage weiter.
+ */
+function takePhoto() {
+    const video = document.getElementById('cameraView');
+    const overlay = document.getElementById('overlay');
+
+    // Kontrollo nëse video është gati
+    if (!video || video.readyState < 2) {
+        alert('Video ende nuk është gati. Ju lutem provoni përsëri.');
+        return;
     }
 
-    // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur nächsten Frage weiterleiten
+    // Merr dimensionet natyrore të videos
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+
+    // Krijo canvas dhe vendos madhësinë
+    const canvas = document.createElement('canvas');
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+
+    const ctx = canvas.getContext('2d');
+
+    // Anullo pasqyrimin si në CSS
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+
+    // Vizato videon në canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Anullo transformimin për overlay
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // Vizato overlay në canvas
+    ctx.drawImage(
+        overlay,
+        0,
+        0,
+        overlay.width,
+        overlay.height,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    // Merr foton si Data URL
+    const dataURL = canvas.toDataURL('image/png');
+
+    // Protokollo foton në konzolë
+    console.log('Foto e bërë (Data URL):', dataURL);
+
+    // Ruaj foton
+    localStorage.setItem('capturedImage', dataURL);
+
+    // Mbyll kamerën
+    closeCamera();
+
+    // Shfaqë e ekranit të ngarkimit
+    const loadingScreen = document.getElementById("loadingScreen");
+    if (loadingScreen) {
+        loadingScreen.style.display = "flex";
+    }
+
+    // Prit 3.5 sekonda dhe vazhdo te pyetja tjetër
     setTimeout(function() {
-        document.getElementById("loadingScreen").style.display = "none";
-        closeCamera(); // Kamera schließen und zurückkehren zum Fragebogen
-        nextQuestion(2); // Zur nächsten Frage wechseln (Frage 2)
+        if (loadingScreen) {
+            loadingScreen.style.display = "none";
+        }
+        nextQuestion(2);
     }, 3500);
 }
 
+// === Gestensteuerung ===
+
 /**
- * Funktionen zum Deaktivieren und Aktivieren von Gesten.
- * Diese verhindern unerwünschte Gesten während der Kameranutzung (z.B. Scrollen, Zoomen).
+ * Deaktiviert unerwünschte Gesten während der Kameranutzung.
  */
 function disableGestures() {
     document.addEventListener('touchmove', preventTouch, { passive: false });
@@ -450,6 +481,9 @@ function disableGestures() {
     document.addEventListener('gestureend', preventGesture);
 }
 
+/**
+ * Aktiviert die zuvor deaktivierten Gesten wieder.
+ */
 function enableGestures() {
     document.removeEventListener('touchmove', preventTouch);
     document.removeEventListener('gesturestart', preventGesture);
@@ -458,16 +492,22 @@ function enableGestures() {
 }
 
 /**
- * Hilfsfunktionen zur Verhinderung von Gesten.
+ * Verhindert das Standardverhalten von Berührungen.
  * @param {Event} event - Das auslösende Ereignis.
  */
 function preventTouch(event) {
     event.preventDefault();  // Verhindert Scrollen durch Berührungen
 }
 
+/**
+ * Verhindert das Standardverhalten von Gesten.
+ * @param {Event} event - Das auslösende Ereignis.
+ */
 function preventGesture(event) {
     event.preventDefault();  // Verhindert Gesten wie Zoom
 }
+
+// === Zoom-Verhinderung ===
 
 // Verhindern des Zoom-Ins durch Doppelklick
 window.addEventListener('dblclick', function(event) {
@@ -500,9 +540,10 @@ document.addEventListener('gestureend', function(event) {
     event.preventDefault();
 });
 
+// === Fragebogenabschluss ===
+
 /**
- * Funktion zum Abschließen des Fragebogens.
- * Speichert die gesammelten Antworten und leitet zur Diagnose-Seite weiter.
+ * Schließt den Fragebogen ab, speichert die Antworten und leitet zur Diagnose-Seite weiter.
  */
 function finishQuestionnaire() {
     // Überprüfen und Speichern des Alters
@@ -531,20 +572,23 @@ function finishQuestionnaire() {
     const diagnosisData = generateDiagnosis(userResponses);
     localStorage.setItem('diagnosisData', JSON.stringify(diagnosisData));
 
-    // Anzeigen des neuen Ladebildschirms
-    document.getElementById("loadingScreen2").style.display = "flex";
+    // Anzeigen des Ladebildschirms
+    const loadingScreen2 = document.getElementById("loadingScreen2");
+    if (loadingScreen2) {
+        loadingScreen2.style.display = "flex";
+    }
 
     // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur Diagnose-Seite weiterleiten
     setTimeout(function() {
-        // Optional: Hier können Sie Animationen hinzufügen oder den Ladebildschirm sanft ausblenden
-        document.getElementById("loadingScreen2").style.display = "none";
-        // Weiterleiten zur Diagnose-Seite
+        if (loadingScreen2) {
+            loadingScreen2.style.display = "none";
+        }
         window.location.href = 'nextPage.html';
     }, 3500);
 }
 
 /**
- * Funktion zur Generierung der Diagnose-Daten basierend auf den Benutzerantworten.
+ * Generiert die Diagnose-Daten basierend auf den Benutzerantworten.
  * @param {Object} userResponses - Die gesammelten Antworten des Benutzers.
  * @returns {Object} - Das Diagnose-Datenobjekt.
  */
@@ -553,15 +597,12 @@ function generateDiagnosis(userResponses) {
     const skinHealthValue = getRandomValue(20, 70); // Wert zwischen 20 und 70%
     const skinHealthStatus = getStatusText(skinHealthValue);
     
-    const textureValue = getRandomValue(20, 50); // Wert zwischen 20 und 50%
-    const textureStatus = 'Care Needed'; // Fester Status
+    // *** Anpassung des texturaValue Bereichs auf 34-74 ***
+    const texturaValue = getRandomValue(34, 74); // Wert zwischen 34 und 74%
+    const texturaStatus = getStatusText(texturaValue); // Dynamischer Status basierend auf texturaValue
 
     /**
      * Konfiguration der spezifischen Hautprobleme und deren Wertbereiche.
-     * Jeder Eintrag enthält:
-     * - selected: Ob das Problem ausgewählt wurde.
-     * - selectedRange: Der Wertebereich, wenn das Problem ausgewählt wurde.
-     * - defaultRange: Der Wertebereich, wenn das Problem nicht ausgewählt wurde.
      */
     const problemsConfig = {
         'Akne': { selected: false, selectedRange: [11, 37], defaultRange: [52, 69] },
@@ -571,7 +612,7 @@ function generateDiagnosis(userResponses) {
     };
     
     // Überprüfen, welche Probleme ausgewählt wurden und entsprechend markieren
-    if (userResponses['question3'] && userResponses['question3'].length > 0) {
+    if (userResponses['question3']) {
         userResponses['question3'].forEach(problem => {
             if (problemsConfig.hasOwnProperty(problem)) {
                 problemsConfig[problem].selected = true;
@@ -583,8 +624,8 @@ function generateDiagnosis(userResponses) {
     const diagnosisData = {
         skinHealthValue: skinHealthValue,
         skinHealthStatus: skinHealthStatus,
-        textureValue: textureValue,
-        textureStatus: textureStatus,
+        texturaValue: texturaValue, // Angepasst auf 34-74%
+        texturaStatus: texturaStatus, // Dynamisch basierend auf texturaValue
         diagnosisText: '', // Wird später generiert
         elasticityValue: getRandomValue(20, 100), // Beispielbereich für Elastizität
         barrierValue: getRandomValue(20, 100)    // Beispielbereich für Hautbarriere
@@ -601,9 +642,8 @@ function generateDiagnosis(userResponses) {
     
     /**
      * Zusätzliche Logik für 'Shëndeti i Lëkurës' basierend auf 'Mirembajtje'.
-     * Wenn 'Mirembajtje' (Pflege) ausgewählt ist, wird der Wert niedriger gesetzt.
      */
-    const isMirembajtjeSelected = userResponses['question3'] && userResponses['question3'].includes('Mirembajtje');
+    const isMirembajtjeSelected = userResponses['question3']?.includes('Mirembajtje');
     if (isMirembajtjeSelected) {
         diagnosisData.shendetiValue = getRandomValue(8, 27); // Niedriger Wert bei ausgewählter Pflege
     } else {
@@ -674,131 +714,102 @@ function generateDiagnosis(userResponses) {
 }
 
 /**
- * Funktion zur Anzeige der Diagnose auf der Diagnose-Seite (`nextPage.html`).
- * Liest die gespeicherten Diagnose-Daten aus dem localStorage und zeigt sie an.
+ * Zeigt die Diagnose auf der Diagnose-Seite (`nextPage.html`) an.
  */
 function displayDiagnosis() {
     // Überprüfen, ob wir auf der Diagnose-Seite sind
-    if (window.location.pathname.endsWith('nextPage.html')) {
-        // Abrufen der Benutzerantworten aus dem localStorage
-        const userResponses = JSON.parse(localStorage.getItem('userResponses'));
-        if (!userResponses) {
-            alert('Asnjë përgjigje u gjet. Ju lutem filloni pyetësorin.'); // "Keine Antworten gefunden. Bitte starten Sie den Fragebogen neu."
-            return;
+    if (!window.location.pathname.endsWith('nextPage.html')) return;
+
+    // Abrufen der Benutzerantworten aus dem localStorage
+    const userResponses = JSON.parse(localStorage.getItem('userResponses'));
+    if (!userResponses) {
+        alert('Asnjë përgjigje u gjet. Ju lutem filloni pyetësorin.'); // "Keine Antworten gefunden. Bitte starten Sie den Fragebogen neu."
+        return;
+    }
+
+    const userName = userResponses['name']; // Benutzername
+    const userAge = userResponses['age'];   // Benutzeralter
+    const skinTypeSelections = userResponses['question2'] || []; // Hauttyp-Auswahl
+    const problemSelections = userResponses['question3'] || [];  // Hautprobleme-Auswahl
+
+    // Anzeige von Name und Alter auf der Diagnose-Seite
+    const userNameElement = document.getElementById('userName');
+    const userAgeElement = document.getElementById('userAge');
+    if (userNameElement) userNameElement.textContent = userName;
+    if (userAgeElement) userAgeElement.textContent = userAge;
+
+    // Abrufen der Diagnose-Daten aus dem localStorage
+    const diagnosisData = JSON.parse(localStorage.getItem('diagnosisData'));
+    if (!diagnosisData) {
+        alert('Asnjë diagnozë u gjet. Ju lutem filloni pyetësorin.'); // "Keine Diagnose gefunden. Bitte starten Sie den Fragebogen neu."
+        return;
+    }
+
+    // Anzeige des Diagnose-Texts
+    const diagnosisTextElement = document.getElementById('diagnosisText');
+    if (diagnosisTextElement) {
+        diagnosisTextElement.textContent = diagnosisData.diagnosisText;
+        diagnosisTextElement.style.textAlign = 'left'; // Links ausrichten
+        diagnosisTextElement.style.fontSize = '1rem';
+        diagnosisTextElement.style.color = '#333';
+        diagnosisTextElement.style.margin = '20px';
+        diagnosisTextElement.style.lineHeight = '1.6';
+        diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
+    }
+    
+    // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës' (Hautgesundheit)
+    const shendetiValueElement = document.getElementById('shendetiValue');
+    const shendetiStatusElement = document.getElementById('shendetiStatus');
+    if (shendetiValueElement) shendetiValueElement.textContent = diagnosisData.shendetiValue;
+    if (shendetiStatusElement) shendetiStatusElement.textContent = diagnosisData.shendetiStatus;
+
+    // Anzeige der Diagrammwerte für andere Hautprobleme
+    const poretValueElement = document.getElementById('poretValue');
+    const poretStatusElement = document.getElementById('poretStatus');
+    if (poretValueElement) poretValueElement.textContent = diagnosisData.poretValue;
+    if (poretStatusElement) poretStatusElement.textContent = getStatusText(diagnosisData.poretValue);
+
+    const texturaValueElement = document.getElementById('texturaValue');
+    const texturaStatusElement = document.getElementById('texturaStatus');
+    if (texturaValueElement) texturaValueElement.textContent = diagnosisData.texturaValue;
+    if (texturaStatusElement) texturaStatusElement.textContent = diagnosisData.texturaStatus;
+
+    const rrudhatValueElement = document.getElementById('rrudhatValue');
+    const rrudhatStatusElement = document.getElementById('rrudhatStatus');
+    if (rrudhatValueElement) rrudhatValueElement.textContent = diagnosisData.rrudhatValue;
+    if (rrudhatStatusElement) rrudhatStatusElement.textContent = getStatusText(diagnosisData.rrudhatValue);
+
+    const hiperpigmentimValueElement = document.getElementById('hiperpigmentimValue');
+    const hiperpigmentimStatusElement = document.getElementById('hiperpigmentimStatus');
+    if (hiperpigmentimValueElement) hiperpigmentimValueElement.textContent = diagnosisData.hiperpigmentimValue;
+    if (hiperpigmentimStatusElement) hiperpigmentimStatusElement.textContent = getStatusText(diagnosisData.hiperpigmentimValue);
+
+    const akneValueElement = document.getElementById('akneValue');
+    const akneStatusElement = document.getElementById('akneStatus');
+    if (akneValueElement) akneValueElement.textContent = diagnosisData.akneValue;
+    if (akneStatusElement) akneStatusElement.textContent = getStatusText(diagnosisData.akneValue);
+
+    // Aktualisieren der progress-circle Hintergrundfarben für alle Kategorien
+    const categories = ['shendeti', 'poret', 'textura', 'rrudhat', 'hiperpigmentim', 'akne'];
+    categories.forEach(category => {
+        const value = diagnosisData[`${category}Value`];
+        const circle = document.querySelector(`.progress-circle[data-category="${category}"]`);
+        if (circle) {
+            circle.dataset.percentage = value;
+            circle.style.background = `conic-gradient(black ${value}%, #F6F6F7 0%)`;
         }
+    });
 
-        const userName = userResponses['name']; // Benutzername
-        const userAge = userResponses['age'];   // Benutzeralter
-        const skinTypeSelections = userResponses['question2'] || []; // Hauttyp-Auswahl
-        const problemSelections = userResponses['question3'] || [];  // Hautprobleme-Auswahl
+    // Setzen der Fortschrittsbalken für Elastizität und Barriere
+    const elasticityBar = document.getElementById('elasticityBar');
+    if (elasticityBar) {
+        elasticityBar.style.width = `${diagnosisData.elasticityValue}%`;
+        elasticityBar.setAttribute('data-status', getStatusText(diagnosisData.elasticityValue));
+    }
 
-        // Anzeige von Name und Alter auf der Diagnose-Seite
-        const userNameElement = document.getElementById('userName');
-        const userAgeElement = document.getElementById('userAge');
-        if (userNameElement) userNameElement.textContent = userName;
-        if (userAgeElement) userAgeElement.textContent = userAge;
-
-        // Abrufen der Diagnose-Daten aus dem localStorage
-        const diagnosisData = JSON.parse(localStorage.getItem('diagnosisData'));
-        if (!diagnosisData) {
-            alert('Asnjë diagnozë u gjet. Ju lutem filloni pyetësorin.'); // "Keine Diagnose gefunden. Bitte starten Sie den Fragebogen neu."
-            return;
-        }
-
-        // Anzeige des Diagnose-Texts
-        const diagnosisTextElement = document.getElementById('diagnosisText');
-        if (diagnosisTextElement) {
-            diagnosisTextElement.textContent = diagnosisData.diagnosisText;
-            diagnosisTextElement.style.textAlign = 'left'; // Links ausrichten
-            // Optional: Weitere Stile setzen, falls nötig
-            diagnosisTextElement.style.fontSize = '1rem';
-            diagnosisTextElement.style.color = '#333';
-            diagnosisTextElement.style.margin = '20px';
-            diagnosisTextElement.style.lineHeight = '1.6';
-            diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
-        }
-        
-        // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës' (Hautgesundheit)
-        const shendetiValueElement = document.getElementById('shendetiValue');
-        const shendetiStatusElement = document.getElementById('shendetiStatus');
-        if (shendetiValueElement) shendetiValueElement.textContent = diagnosisData.shendetiValue;
-        if (shendetiStatusElement) shendetiStatusElement.textContent = diagnosisData.shendetiStatus;
-
-        // Anzeige der Diagrammwerte für andere Hautprobleme
-        const poretValueElement = document.getElementById('poretValue');
-        const poretStatusElement = document.getElementById('poretStatus');
-        if (poretValueElement) poretValueElement.textContent = diagnosisData.poretValue;
-        if (poretStatusElement) poretStatusElement.textContent = getStatusText(diagnosisData.poretValue);
-
-        const textureValueElement = document.getElementById('textureValue');
-        const textureStatusElement = document.getElementById('textureStatus');
-        if (textureValueElement) textureValueElement.textContent = diagnosisData.textureValue;
-        if (textureStatusElement) textureStatusElement.textContent = diagnosisData.textureStatus;
-
-        const rrudhatValueElement = document.getElementById('rrudhatValue');
-        const rrudhatStatusElement = document.getElementById('rrudhatStatus');
-        if (rrudhatValueElement) rrudhatValueElement.textContent = diagnosisData.rrudhatValue;
-        if (rrudhatStatusElement) rrudhatStatusElement.textContent = getStatusText(diagnosisData.rrudhatValue);
-
-        const hiperpigmentimValueElement = document.getElementById('hiperpigmentimValue');
-        const hiperpigmentimStatusElement = document.getElementById('hiperpigmentimStatus');
-        if (hiperpigmentimValueElement) hiperpigmentimValueElement.textContent = diagnosisData.hiperpigmentimValue;
-        if (hiperpigmentimStatusElement) hiperpigmentimStatusElement.textContent = getStatusText(diagnosisData.hiperpigmentimValue);
-
-        const akneValueElement = document.getElementById('akneValue');
-        const akneStatusElement = document.getElementById('akneStatus');
-        if (akneValueElement) akneValueElement.textContent = diagnosisData.akneValue;
-        if (akneStatusElement) akneStatusElement.textContent = getStatusText(diagnosisData.akneValue);
-
-        // Aktualisieren der progress-circle Hintergrundfarben für 'Shëndeti i Lëkurës'
-        const shendetiCircle = document.querySelector(`.progress-circle[data-category="shendeti"]`);
-        if (shendetiCircle) {
-            shendetiCircle.dataset.percentage = diagnosisData.shendetiValue;
-            shendetiCircle.style.background = `conic-gradient(black ${diagnosisData.shendetiValue}%, #F6F6F7 0%)`;
-        }
-
-        // Aktualisieren der progress-circle Hintergrundfarben für andere Hautprobleme
-        const poretCircle = document.querySelector(`.progress-circle[data-category="poret"]`);
-        if (poretCircle) {
-            poretCircle.dataset.percentage = diagnosisData.poretValue;
-            poretCircle.style.background = `conic-gradient(black ${diagnosisData.poretValue}%, #F6F6F7 0%)`;
-        }
-
-        const textureCircle = document.querySelector(`.progress-circle[data-category="tekstura"]`);
-        if (textureCircle) {
-            textureCircle.dataset.percentage = diagnosisData.textureValue;
-            textureCircle.style.background = `conic-gradient(black ${diagnosisData.textureValue}%, #F6F6F7 0%)`;
-        }
-
-        const rrudhatCircle = document.querySelector(`.progress-circle[data-category="rrudhat"]`);
-        if (rrudhatCircle) {
-            rrudhatCircle.dataset.percentage = diagnosisData.rrudhatValue;
-            rrudhatCircle.style.background = `conic-gradient(black ${diagnosisData.rrudhatValue}%, #F6F6F7 0%)`;
-        }
-
-        const hiperpigmentimCircle = document.querySelector(`.progress-circle[data-category="hiperpigmentim"]`);
-        if (hiperpigmentimCircle) {
-            hiperpigmentimCircle.dataset.percentage = diagnosisData.hiperpigmentimValue;
-            hiperpigmentimCircle.style.background = `conic-gradient(black ${diagnosisData.hiperpigmentimValue}%, #F6F6F7 0%)`;
-        }
-
-        const akneCircle = document.querySelector(`.progress-circle[data-category="akne"]`);
-        if (akneCircle) {
-            akneCircle.dataset.percentage = diagnosisData.akneValue;
-            akneCircle.style.background = `conic-gradient(black ${diagnosisData.akneValue}%, #F6F6F7 0%)`;
-        }
-
-        // Setzen der Fortschrittsbalken für Elastizität und Barriere
-        const elasticityBar = document.getElementById('elasticityBar');
-        if (elasticityBar) {
-            elasticityBar.style.width = `${diagnosisData.elasticityValue}%`;
-            elasticityBar.setAttribute('data-status', getStatusText(diagnosisData.elasticityValue));
-        }
-
-        const barrierBar = document.getElementById('barrierBar');
-        if (barrierBar) {
-            barrierBar.style.width = `${diagnosisData.barrierValue}%`;
-            barrierBar.setAttribute('data-status', getStatusText(diagnosisData.barrierValue));
-        }
+    const barrierBar = document.getElementById('barrierBar');
+    if (barrierBar) {
+        barrierBar.style.width = `${diagnosisData.barrierValue}%`;
+        barrierBar.setAttribute('data-status', getStatusText(diagnosisData.barrierValue));
     }
 }
