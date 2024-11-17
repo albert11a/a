@@ -35,282 +35,444 @@ function getStatusText(value) {
     }
 }
 
-// === Produkt-Mapping und Empfehlungen ===
-const productRecommendations = {
-    'Akne': {
-        name: 'Benzoyl Peroxide 5%',
-        price: 19.99, // Preis des Produkts in €
-        id: '8050210963676'
-    },
-    'Poret': {
-        name: 'Pore Control',
-        price: 24.99, // Preis des Produkts in €
-        id: '8056262557916'
-    }
-    // Hier können Sie weitere Produkte hinzufügen, wenn Sie möchten
-};
 
-// === Shopify Buy Button Client Initialisierung ===
-let client = ShopifyBuy.buildClient({
-    domain: 'lifeskin-ks-4785.myshopify.com',
-    storefrontAccessToken: '3ff7175c4f759e429a8d332922360fee',
-});
 
-/**
- * Funktion zum Hinzufügen der Produktvorschläge basierend auf den Benutzerantworten.
- */
-function displayProductRecommendations() {
-    const productsContainer = document.getElementById('products-container');
-    const selectedProblems = userResponses['question3'] || [];
-    
-    selectedProblems.forEach(problem => {
-        if (productRecommendations.hasOwnProperty(problem)) {
-            const product = productRecommendations[problem];
-            const divId = `product-component-${product.id}`;
-            
-            // Überprüfen, ob das Produkt bereits hinzugefügt wurde, um Duplikate zu vermeiden
-            if (document.getElementById(divId)) return;
-            
-            // Erstellen eines Containers für das Produkt
-            const productDiv = document.createElement('div');
-            productDiv.id = divId;
-            productDiv.classList.add('product-item'); // Optional: Für zusätzliche Styling-Klassen
-            productsContainer.appendChild(productDiv);
-            
-            // Initialisieren des Shopify Buy Button für das Produkt
-            ShopifyBuy.UI.onReady(client).then(function (ui) {
-                ui.createComponent('product', {
-                    id: product.id,
-                    node: document.getElementById(divId),
-                    moneyFormat: '%E2%82%AC%7B%7Bamount_with_comma_separator%7D%7D',
-                    options: {
-                        "product": {
-                            "styles": {
-                                "product": {
-                                    "@media (min-width: 601px)": {
-                                        "max-width": "100%",
-                                        "margin-left": "0px",
-                                        "margin-bottom": "50px"
-                                    }
-                                },
-                                "title": {
-                                    "color": "#000000"
-                                },
-                                "button": {
-                                    "font-family": "Gill Sans, sans-serif",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    "background-color": "#000000",
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    },
-                                    "border-radius": "7px"
-                                },
-                                "price": {
-                                    "font-size": "19px",
-                                    "color": "#000000"
-                                },
-                                "compareAt": {
-                                    "font-size": "16.15px",
-                                    "color": "#000000"
-                                },
-                                "unitPrice": {
-                                    "font-size": "16.15px",
-                                    "color": "#000000"
-                                }
-                            },
-                            "width": "380px",
-                            "text": {
-                                "button": "In den Warenkorb"
-                            }
-                        },
-                        "productSet": {
-                            "styles": {
-                                "products": {
-                                    "@media (min-width: 601px)": {
-                                        "margin-left": "-20px"
-                                    }
-                                }
-                            }
-                        },
-                        "modalProduct": {
-                            "contents": {
-                                "img": false,
-                                "imgWithCarousel": true,
-                                "button": false,
-                                "buttonWithQuantity": true
-                            },
-                            "styles": {
-                                "product": {
-                                    "@media (min-width: 601px)": {
-                                        "max-width": "100%",
-                                        "margin-left": "0px",
-                                        "margin-bottom": "0px"
-                                    }
-                                },
-                                "button": {
-                                    "font-family": "Gill Sans, sans-serif",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    "background-color": "#000000",
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    },
-                                    "border-radius": "7px"
-                                },
-                                "title": {
-                                    "font-family": "Helvetica Neue, sans-serif",
-                                    "font-weight": "bold",
-                                    "font-size": "26px",
-                                    "color": "#4c4c4c"
-                                },
-                                "price": {
-                                    "font-family": "Helvetica Neue, sans-serif",
-                                    "font-weight": "normal",
-                                    "font-size": "18px",
-                                    "color": "#4c4c4c"
-                                },
-                                "compareAt": {
-                                    "font-family": "Helvetica Neue, sans-serif",
-                                    "font-weight": "normal",
-                                    "font-size": "15.299999999999999px",
-                                    "color": "#4c4c4c"
-                                },
-                                "unitPrice": {
-                                    "font-family": "Helvetica Neue, sans-serif",
-                                    "font-weight": "normal",
-                                    "font-size": "15.299999999999999px",
-                                    "color": "#4c4c4c"
-                                }
-                            },
-                            "text": {
-                                "button": "Add to cart"
-                            }
-                        },
-                        "option": {},
-                        "cart": {
-                            "styles": {
-                                "button": {
-                                    "font-family": "Gill Sans, sans-serif",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    "background-color": "#000000",
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    },
-                                    "border-radius": "7px"
-                                },
-                                "title": {
-                                    "color": "#000000"
-                                },
-                                "header": {
-                                    "color": "#000000"
-                                },
-                                "lineItems": {
-                                    "color": "#000000"
-                                },
-                                "subtotalText": {
-                                    "color": "#000000"
-                                },
-                                "subtotal": {
-                                    "color": "#000000"
-                                },
-                                "notice": {
-                                    "color": "#000000"
-                                },
-                                "currency": {
-                                    "color": "#000000"
-                                },
-                                "close": {
-                                    "color": "#000000",
-                                    ":hover": {
-                                        "color": "#000000"
-                                    }
-                                },
-                                "empty": {
-                                    "color": "#000000"
-                                },
-                                "noteDescription": {
-                                    "color": "#000000"
-                                },
-                                "discountText": {
-                                    "color": "#000000"
-                                },
-                                "discountIcon": {
-                                    "fill": "#000000"
-                                },
-                                "discountAmount": {
-                                    "color": "#000000"
-                                }
-                            },
-                            "text": {
-                                "title": "Shporta",
-                                "total": "Total",
-                                "notice": "Posta falas ",
-                                "button": "Porosit"
-                            }
-                        },
-                        "toggle": {
-                            "styles": {
-                                "toggle": {
-                                    "font-family": "Gill Sans, sans-serif",
-                                    "background-color": "#000000",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    }
-                                }
-                            }
-                        },
-                        "lineItem": {
-                            "styles": {
-                                "variantTitle": {
-                                    "color": "#000000"
-                                },
-                                "title": {
-                                    "color": "#000000"
-                                },
-                                "price": {
-                                    "color": "#000000"
-                                },
-                                "fullPrice": {
-                                    "color": "#000000"
-                                },
-                                "discount": {
-                                    "color": "#000000"
-                                },
-                                "discountIcon": {
-                                    "fill": "#000000"
-                                },
-                                "quantity": {
-                                    "color": "#000000"
-                                },
-                                "quantityIncrement": {
-                                    "color": "#000000",
-                                    "border-color": "#000000"
-                                },
-                                "quantityDecrement": {
-                                    "color": "#000000",
-                                    "border-color": "#000000"
-                                },
-                                "quantityInput": {
-                                    "color": "#000000",
-                                    "border-color": "#000000"
-                                }
-                            }
-                        }
-                    },
+
+
+
+
+
+
+
+
+        // Produkt-Empfehlungen
+        const productRecommendations = {
+            'Akne': {
+                name: 'Benzoyl Peroxide 5%',
+                price: 19.99,
+                id: '8050210963676',
+                description: 'Lifeskin Benzoyl Peroxide 5% përmban formulën unike ,një sekret i vërtetë për një lëkurë të shëndetshme.',
+                purpose: 'Largon aknet hormonale dhe bakteriale dhe shenjat nga aknet',
+                activeIngredients: 'Benzoylperoxid 5%',
+                usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
+            },
+            'Poret': {
+                name: 'Pore Control',
+                price: 24.99,
+                id: '8056262557916',
+                description: 'Kontrolliert und minimiert die Porengröße.',
+                purpose: 'Verkleinert sichtbare Poren und glättet die Haut.',
+                activeIngredients: 'Salicylsäure, Niacinamid',
+                usage: 'Tragen Sie es morgens und abends nach der Reinigung auf.'
+            },
+            'Hiperpigmentim': {
+                name: 'Vitac',
+                price: 29.99,
+                id: '8050211684572',
+                description: 'Behandelt Hyperpigmentierung und ungleichmäßigen Hautton.',
+                purpose: 'Hellere Haut und verbesserte Hautstruktur.',
+                activeIngredients: 'Vitamin C, Retinol',
+                usage: 'Tragen Sie es täglich nach der Reinigung auf die betroffenen Bereiche auf.'
+            },
+            'Rrudhat': {
+                name: 'Reti',
+                price: 21.99,
+                id: '8050211455196',
+                description: 'Pflegt empfindliche Haut und reduziert Rötungen.',
+                purpose: 'Beruhigt die Haut und mindert Rötungen.',
+                activeIngredients: 'Aloe Vera, Kamilleextrakt',
+                usage: 'Tragen Sie es sanft auf die gereinigte Haut auf.'
+            },
+            'Mirembajtje': {
+                name: 'Hydro Cleanser',
+                price: 15.99,
+                id: '8050211127516',
+                description: 'Hydratisiert und reinigt die Haut gründlich.',
+                purpose: 'Gibt der Haut Feuchtigkeit und entfernt Unreinheiten.',
+                activeIngredients: 'Hyaluronsäure, Glycerin',
+                usage: 'Mischen Sie eine kleine Menge mit Wasser und reinigen Sie Ihr Gesicht sanft.'
+            }
+        };
+
+        // === Shopify Buy Button Client Initialisierung ===
+        const client = ShopifyBuy.buildClient({
+            domain: 'lifeskin-ks-4785.myshopify.com',
+            storefrontAccessToken: '3ff7175c4f759e429a8d332922360fee',
+        });
+
+        let checkoutId;
+
+        // Initialisiere oder hole den Checkout
+        function initializeCheckout() {
+            if (localStorage.getItem('checkoutId')) {
+                checkoutId = localStorage.getItem('checkoutId');
+            } else {
+                client.checkout.create().then((checkout) => {
+                    checkoutId = checkout.id;
+                    localStorage.setItem('checkoutId', checkoutId);
+                }).catch(error => {
+                    console.error('Fehler beim Erstellen des Checkouts:', error);
                 });
-                console.log(`Produkt hinzugefügt: ${product.name}`); // Konsolenlog für Debugging
+            }
+        }
+
+        // Rufe diese Funktion beim Laden der Seite auf
+        initializeCheckout();
+
+        /**
+         * Funktion zum Erstellen eines collapsiblen Abschnitts
+         */
+        function createCollapsibleSection(title, content, isOpen = false) {
+            const section = document.createElement('div');
+            section.classList.add('collapsible-section');
+
+            const header = document.createElement('button');
+            header.classList.add('collapsible');
+
+            // Label und Pfeil
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = title;
+            header.appendChild(labelSpan);
+
+            if (isOpen) {
+                header.classList.add('active');
+            }
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('content');
+            contentDiv.innerHTML = `<p>${content}</p>`;
+            if (isOpen) {
+                contentDiv.style.display = 'block';
+            }
+
+            header.addEventListener('click', function () {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                }
+            });
+
+            section.appendChild(header);
+            section.appendChild(contentDiv);
+
+            return section;
+        }
+
+        /**
+         * Funktion zum Anzeigen der Produkt-Empfehlungen
+         */
+        function displayProductRecommendations() {
+            const productsContainer = document.getElementById('products-container');
+            const selectedProblems = userResponses['question3'] || [];
+
+            selectedProblems.forEach((problem, index) => {
+                if (productRecommendations.hasOwnProperty(problem)) {
+                    const product = productRecommendations[problem];
+                    const divId = `product-component-${product.id}`;
+
+                    // Überprüfen, ob das Produkt bereits hinzugefügt wurde, um Duplikate zu vermeiden
+                    if (document.getElementById(divId)) return;
+
+                    // Erstellen eines Containers für das Produkt
+                    const productDiv = document.createElement('div');
+                    productDiv.id = divId;
+                    productDiv.classList.add('product-item');
+                    productsContainer.appendChild(productDiv);
+
+                    // Initialisieren des Shopify Buy Button für das Produkt
+                    ShopifyBuy.UI.onReady(client).then(function (ui) {
+                        ui.createComponent('product', {
+                            id: product.id,
+                            node: productDiv,
+                            moneyFormat: '%E2%82%AC%7B%7Bamount_with_comma_separator%7D%7D',
+                            options: {
+                                "product": {
+                                    "styles": {
+                                        "product": {
+                                            "text-align": "left", /* Alles im Produkt links ausgerichtet */
+                                            "@media (min-width: 601px)": {
+                                                "max-width": "100%",
+                                                "margin-left": "0px",
+                                                "margin-bottom": "50px"
+                                            }
+                                        },
+                                        "title": {
+                                            "font-size": "12px",
+                                            "color": "#000000",
+                                            "text-align": "left" /* Links ausgerichtet */
+                                        },
+                                        "button": {
+                                            "width": "100%",
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            ":hover": {
+                                                "background-color": "#000000"
+                                            },
+                                            "background-color": "#000000",
+                                            ":focus": {
+                                                "background-color": "#000000"
+                                            },
+                                            "border-radius": "7px"
+                                        },
+                                        "price": {
+                                            "font-size": "12px",
+                                            "color": "#000000",
+                                            "text-align": "left" /* Links ausgerichtet */
+                                        },
+                                        "compareAt": {
+                                            "font-size": "12px",
+                                            "color": "#000000",
+                                            "text-align": "left" /* Links ausgerichtet */
+                                        },
+                                        "unitPrice": {
+                                            "font-size": "12px",
+                                            "color": "#000000",
+                                            "text-align": "left" /* Links ausgerichtet */ 
+                                        }
+                                    },
+                                    "width": "380px",
+                                    "text": {
+                                        "button": "shto në shportë"
+                                    }
+                                },
+                                "productSet": {
+                                    "styles": {
+                                        "products": {
+                                            "@media (min-width: 601px)": {
+                                                "margin-left": "-20px"
+                                            }
+                                        }
+                                    }
+                                },
+                                "modalProduct": {
+                                    "contents": {
+                                        "img": false,
+                                        "imgWithCarousel": true,
+                                        "button": false,
+                                        "buttonWithQuantity": true
+                                    },
+                                    "styles": {
+                                        "product": {
+                                            "@media (min-width: 601px)": {
+                                                "max-width": "100%",
+                                                "margin-left": "0px",
+                                                "margin-bottom": "0px"
+                                            }
+                                        },
+                                        "button": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            ":hover": {
+                                                "background-color": "#000000"
+                                            },
+                                            "background-color": "#000000",
+                                            ":focus": {
+                                                "background-color": "#000000"
+                                            },
+                                            "border-radius": "7px"
+                                        },
+                                        "title": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            "font-weight": "bold",
+                                            "font-size": "12px",
+                                            "color": "#4c4c4c"
+                                        },
+                                        "price": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            "font-weight": "normal",
+                                            "font-size": "18px",
+                                            "color": "#4c4c4c",
+                                            "text-align": "left"
+                                            
+                                        },
+                                        "compareAt": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            "font-weight": "normal",
+                                            "font-size": "15.3px",
+                                            "color": "#4c4c4c"
+                                        },
+                                        "unitPrice": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            "font-weight": "normal",
+                                            "font-size": "15.3px",
+                                            "color": "#4c4c4c",
+                                            "text-align": "left"
+                                        }
+                                    },
+                                    "text": {
+                                        "button": "Add to cart"
+                                    }
+                                },
+                                "option": {},
+                                "cart": {
+                                    "styles": {
+                                        "button": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            ":hover": {
+                                                "background-color": "#000000"
+                                            },
+                                            "background-color": "#000000",
+                                            ":focus": {
+                                                "background-color": "#000000"
+                                            },
+                                            "border-radius": "7px"
+                                        },
+                                        "title": {
+                                            "color": "#000000"
+                                        },
+                                        "header": {
+                                            "color": "#000000"
+                                        },
+                                        "lineItems": {
+                                            "color": "#000000"
+                                        },
+                                        "subtotalText": {
+                                            "color": "#000000"
+                                        },
+                                        "subtotal": {
+                                            "color": "#000000"
+                                        },
+                                        "notice": {
+                                            "color": "#000000"
+                                        },
+                                        "currency": {
+                                            "color": "#000000"
+                                        },
+                                        "close": {
+                                            "color": "#000000",
+                                            ":hover": {
+                                                "color": "#000000"
+                                            }
+                                        },
+                                        "empty": {
+                                            "color": "#000000"
+                                        },
+                                        "noteDescription": {
+                                            "color": "#000000"
+                                        },
+                                        "discountText": {
+                                            "color": "#000000"
+                                        },
+                                        "discountIcon": {
+                                            "fill": "#000000"
+                                        },
+                                        "discountAmount": {
+                                            "color": "#000000"
+                                        }
+                                    },
+                                    "text": {
+                                        "title": "Shporta",
+                                        "total": "Total",
+                                        "notice": "Posta falas ",
+                                        "button": "Porosit"
+                                    }
+                                },
+                                "toggle": {
+                                    "styles": {
+                                        "toggle": {
+                                            "font-family": "Harmonia Sans, sans-serif",
+                                            "background-color": "#000000",
+                                            ":hover": {
+                                                "background-color": "#000000"
+                                            },
+                                            ":focus": {
+                                                "background-color": "#000000"
+                                            }
+                                        }
+                                    }
+                                },
+                                "lineItem": {
+                                    "styles": {
+                                        "variantTitle": {
+                                            "color": "#000000"
+                                        },
+                                        "title": {
+                                            "color": "#000000"
+                                        },
+                                        "price": {
+                                            "color": "#000000"
+                                        },
+                                        "fullPrice": {
+                                            "color": "#000000"
+                                        },
+                                        "discount": {
+                                            "color": "#000000"
+                                        },
+                                        "discountIcon": {
+                                            "fill": "#000000"
+                                        },
+                                        "quantity": {
+                                            "color": "#000000"
+                                        },
+                                        "quantityIncrement": {
+                                            "color": "#000000",
+                                            "border-color": "#000000"
+                                        },
+                                        "quantityDecrement": {
+                                            "color": "#000000",
+                                            "border-color": "#000000"
+                                        },
+                                        "quantityInput": {
+                                            "color": "#000000",
+                                            "border-color": "#000000"
+                                        }
+                                    }
+                                }
+                            },
+                        });
+
+                        // Nachdem der Buy Button erstellt wurde, fügen Sie die collapsible Sektion hinzu
+                        // Verwende setTimeout, um sicherzustellen, dass der Button gerendert wurde
+                        setTimeout(() => {
+                            // Erstellen der Collapsible Sektionen
+                            const collapsibleContainer = document.createElement('div');
+                            collapsibleContainer.classList.add('collapsible-container');
+
+                            const sections = [
+                                { title: 'Përshkrimi', content: product.description },
+                                { title: 'Për çfarë shërben', content: product.purpose },
+                                { title: 'Substanca aktive', content: product.activeIngredients },
+                                { title: 'Përdorimi', content: product.usage },
+                                
+                            ];
+
+                            sections.forEach((section, secIndex) => {
+                                const isOpen = secIndex === 0; // Optional: Erstes Section geöffnet
+                                const collapsibleSection = createCollapsibleSection(section.title, section.content, isOpen);
+                                collapsibleContainer.appendChild(collapsibleSection);
+                            });
+
+                            // Fügen Sie die collapsible Sektion unter dem "In den Warenkorb" Button hinzu
+                            // Finden Sie den "In den Warenkorb" Button innerhalb des productDiv
+                            const buyButton = productDiv.querySelector('button');
+                            if (buyButton) {
+                                buyButton.insertAdjacentElement('afterend', collapsibleContainer);
+                            } else {
+                                // Fallback: Fügen Sie die collapsible Sektion einfach am Ende des productDiv hinzu
+                                productDiv.appendChild(collapsibleContainer);
+                            }
+                        }, 1000); // Warte 1 Sekunde
+                    });
+                }
             });
         }
-    });
-}
+
+
+
+        // Rufe die Funktion auf, um die Empfehlungen anzuzeigen, nachdem das DOM geladen ist
+        document.addEventListener('DOMContentLoaded', function () {
+            displayProductRecommendations();
+        });
+
+
+
+
+
+
+
+
+
 
 // === Fragebogen-Management ===
 
@@ -334,7 +496,7 @@ function startQuestionnaire() {
  * Event-Listener, der den Fragebogen beim Laden der Seite startet
  * oder die Diagnoseseite anzeigt, falls bereits ein Fragebogen abgeschlossen wurde.
  */
-window.onload = function() {
+window.onload = function () {
     if (window.location.pathname.endsWith('nextPage.html')) {
         displayDiagnosis();
     } else {
@@ -738,7 +900,7 @@ function takePhoto() {
     }
 
     // Prit 3.5 sekonda dhe vazhdo te pyetja tjetër
-    setTimeout(function() {
+    setTimeout(function () {
         if (loadingScreen) {
             loadingScreen.style.display = "none";
         }
@@ -787,33 +949,33 @@ function preventGesture(event) {
 // === Zoom-Verhinderung ===
 
 // Verhindern des Zoom-Ins durch Doppelklick
-window.addEventListener('dblclick', function(event) {
+window.addEventListener('dblclick', function (event) {
     event.preventDefault();
 });
 
 // Verhindern des Zoom-Ins durch Tastenkombinationen (z.B. Ctrl + Plus/Minus)
-window.addEventListener('keydown', function(event) {
-    if ((event.ctrlKey || event.metaKey) && 
+window.addEventListener('keydown', function (event) {
+    if ((event.ctrlKey || event.metaKey) &&
         (event.key === '+' || event.key === '-' || event.key === '=' || event.key === '0')) {
         event.preventDefault();
     }
 });
 
 // Verhindern des Zoom-Ins durch Mausrad mit gedrückter Ctrl-Taste
-window.addEventListener('wheel', function(event) {
+window.addEventListener('wheel', function (event) {
     if (event.ctrlKey) {
         event.preventDefault();
     }
 }, { passive: false });
 
 // Verhindern von Zoom-Gesten auf Touch-Geräten
-document.addEventListener('gesturestart', function(event) {
+document.addEventListener('gesturestart', function (event) {
     event.preventDefault();
 });
-document.addEventListener('gesturechange', function(event) {
+document.addEventListener('gesturechange', function (event) {
     event.preventDefault();
 });
-document.addEventListener('gestureend', function(event) {
+document.addEventListener('gestureend', function (event) {
     event.preventDefault();
 });
 
@@ -856,7 +1018,7 @@ function finishQuestionnaire() {
     }
 
     // Nach 3,5 Sekunden den Ladebildschirm ausblenden und zur Diagnose-Seite weiterleiten
-    setTimeout(function() {
+    setTimeout(function () {
         if (loadingScreen2) {
             loadingScreen2.style.display = "none";
         }
@@ -873,7 +1035,7 @@ function generateDiagnosis(userResponses) {
     // Generierung der Basiseigenschaften
     const skinHealthValue = getRandomValue(20, 70); // Wert zwischen 20 und 70%
     const skinHealthStatus = getStatusText(skinHealthValue);
-    
+
     // *** Anpassung des texturaValue Bereichs auf 34-74 ***
     const texturaValue = getRandomValue(34, 74); // Wert zwischen 34 und 74%
     const texturaStatus = getStatusText(texturaValue); // Dynamischer Status basierend auf texturaValue
@@ -887,7 +1049,7 @@ function generateDiagnosis(userResponses) {
         'Hiperpigmentim': { selected: false, selectedRange: [14, 34], defaultRange: [52, 69] },
         'Rrudhat': { selected: false, selectedRange: [24, 39], defaultRange: [52, 69] }
     };
-    
+
     // Überprüfen, welche Probleme ausgewählt wurden und entsprechend markieren
     if (userResponses['question3']) {
         userResponses['question3'].forEach(problem => {
@@ -896,7 +1058,7 @@ function generateDiagnosis(userResponses) {
             }
         });
     }
-    
+
     // Initialisierung des Diagnose-Datenobjekts
     const diagnosisData = {
         skinHealthValue: skinHealthValue,
@@ -907,7 +1069,7 @@ function generateDiagnosis(userResponses) {
         elasticityValue: getRandomValue(20, 100), // Beispielbereich für Elastizität
         barrierValue: getRandomValue(20, 100)    // Beispielbereich für Hautbarriere
     };
-    
+
     // Generierung der Werte für spezifische Probleme basierend auf der Auswahl
     for (const [problem, config] of Object.entries(problemsConfig)) {
         if (config.selected) {
@@ -916,7 +1078,7 @@ function generateDiagnosis(userResponses) {
             diagnosisData[`${problem.toLowerCase()}Value`] = getRandomValue(config.defaultRange[0], config.defaultRange[1]);
         }
     }
-    
+
     /**
      * Zusätzliche Logik für 'Shëndeti i Lëkurës' basierend auf 'Mirembajtje'.
      */
@@ -927,12 +1089,12 @@ function generateDiagnosis(userResponses) {
         diagnosisData.shendetiValue = getRandomValue(52, 69); // Normaler Bereich ohne Pflege
     }
     diagnosisData.shendetiStatus = getStatusText(diagnosisData.shendetiValue);
-    
+
     /**
      * Generierung des Diagnose-Texts basierend auf Hauttyp und ausgewählten Problemstellungen.
      */
     let diagnosisText = '';
-    
+
     // Integration des ausgewählten Hauttyps in den Diagnose-Text
     if (userResponses['question2'] && userResponses['question2'].length > 0) {
         const skinType = userResponses['question2'][0];
@@ -953,12 +1115,12 @@ function generateDiagnosis(userResponses) {
                 diagnosisText += 'Sebumi i lëkurës tuaj është në gjendje të mirë. '; // "Ihre Haut ist in gutem Zustand."
         }
     }
-    
+
     // Integration der ausgewählten Problemstellungen in den Diagnose-Text
     if (userResponses['question3'] && userResponses['question3'].length > 0) {
         diagnosisText += 'Pas analizës, kemi vërejtur se keni problemet e mëposhtme: '; // "Nach der Analyse haben wir festgestellt, dass Sie folgende Probleme haben:"
         diagnosisText += userResponses['question3'].join(', ').toLowerCase() + '. '; // Auflistung der Probleme
-        
+
         // Auswahl einer zufälligen Diagnosevariante aus einem Array von Optionen
         const diagnosisVariants = [
             'Kemi identifikuar këto probleme si rezultat të faktorëve të ndryshëm të jetës së përditshme dhe ambientit. ',
@@ -973,20 +1135,20 @@ function generateDiagnosis(userResponses) {
             'Produktet e tepërt për kujdesin e lëkurës mund të çojnë në irritim dhe probleme të tjera. '
             // Weitere Varianten können hier hinzugefügt werden
         ];
-        
+
         // Zufällige Auswahl einer Diagnosevariante
         const randomIndex = Math.floor(Math.random() * diagnosisVariants.length);
         diagnosisText += diagnosisVariants[randomIndex];
     } else {
         diagnosisText += 'Lëkura juaj duket e shëndetshme. Rekomandojmë të vazhdoni me rutinën tuaj të kujdesit të lëkurës. '; // "Ihre Haut sieht gesund aus. Wir empfehlen, Ihre Hautpflegeroutine fortzusetzen."
     }
-    
+
     // Zusätzliche Informationen zur Diagnose
     diagnosisText += 'Është e rëndësishme të kuptoni se kujdesi adekuat për lëkurën mund të ndihmojë në parandalimin dhe përmirësimin e këtyre problemeve. '; // "Es ist wichtig zu verstehen, dass angemessene Hautpflege dazu beitragen kann, diese Probleme zu verhindern und zu verbessern."
 
     // Speichern des generierten Diagnose-Texts im Diagnose-Datenobjekt
     diagnosisData.diagnosisText = diagnosisText;
-    
+
     return diagnosisData;
 }
 
@@ -1033,7 +1195,7 @@ function displayDiagnosis() {
         diagnosisTextElement.style.lineHeight = '1.6';
         diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
     }
-    
+
     // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës' (Hautgesundheit)
     const shendetiValueElement = document.getElementById('shendetiValue');
     const shendetiStatusElement = document.getElementById('shendetiStatus');
