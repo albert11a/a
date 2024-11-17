@@ -35,436 +35,493 @@ function getStatusText(value) {
     }
 }
 
+// ... (Weitere Hilfsfunktionen bleiben unverändert) ...
+
+// Produkt-Empfehlungen
+const productRecommendations = {
+    'Akne': {
+        name: 'Benzoyl Peroxide 5%',
+        price: 19.99,
+        id: '8050210963676',
+        description: 'Lifeskin Benzoyl Peroxide 5% përmban formulën unike ,një sekret i vërtetë për një lëkurë të shëndetshme.',
+        purpose: 'Largon aknet hormonale dhe bakteriale dhe shenjat nga aknet',
+        activeIngredients: 'Benzoylperoxid 5%',
+        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
+    },
+    'Poret': {
+        name: 'Pore Control',
+        price: 24.99,
+        id: '8056262557916',
+        description: 'Kontrollon dhe minimizon madhësinë e poreve.',
+        purpose: 'Zvogëlon poret e dukshme dhe lëmon lëkurën.',
+        activeIngredients: 'Acidi Salicilik, Niacinamid',
+        usage: 'Aplikojeni në mëngjes dhe në mbrëmje pas pastrimit.'
+    },
+    'Hiperpigmentim': {
+        name: 'Vitac',
+        price: 29.99,
+        id: '8050211684572',
+        description: 'Trajton hiperpigmentimin dhe tonin e pabarabartë të lëkurës.',
+        purpose: 'Lëkurë më e ndritshme dhe strukturë e përmirësuar e lëkurës.',
+        activeIngredients: 'Vitamina C, Retinol',
+        usage: 'Aplikojeni çdo ditë pas pastrimit në zonat e prekura.'
+    },
+    'Rrudhat': {
+        name: 'Reti',
+        price: 21.99,
+        id: '8050211455196',
+        description: 'Kujdeset për lëkurën e ndjeshme dhe redukton skuqjen.',
+        purpose: 'Qetëson lëkurën dhe zvogëlon skuqjen.',
+        activeIngredients: 'Aloe Vera, Ekstrakt Kamomili',
+        usage: 'Aplikojeni butësisht në lëkurën e pastruar.'
+    },
+    'Mirembajtje': {
+        name: 'Hydro Cleanser',
+        price: 15.99,
+        id: '8050211127516',
+        description: 'Hidraton dhe pastron lëkurën në thellësi.',
+        purpose: 'I jep lëkurës lagështi dhe heq papastërtitë.',
+        activeIngredients: 'Acid Hialuronik, Glicerinë',
+        usage: 'Përzieni një sasi të vogël me ujë dhe pastroni fytyrën butësisht.'
+    }
+};
+
+// === Shopify Buy Button Client Initialisierung ===
+const client = ShopifyBuy.buildClient({
+    domain: 'lifeskin-ks-4785.myshopify.com',
+    storefrontAccessToken: '3ff7175c4f759e429a8d332922360fee',
+});
 
 
 
-
-
-
-
-
-
-
-        // Produkt-Empfehlungen
-        const productRecommendations = {
-            'Akne': {
-                name: 'Benzoyl Peroxide 5%',
-                price: 19.99,
-                id: '8050210963676',
-                description: 'Lifeskin Benzoyl Peroxide 5% përmban formulën unike ,një sekret i vërtetë për një lëkurë të shëndetshme.',
-                purpose: 'Largon aknet hormonale dhe bakteriale dhe shenjat nga aknet',
-                activeIngredients: 'Benzoylperoxid 5%',
-                usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
-            },
-            'Poret': {
-                name: 'Pore Control',
-                price: 24.99,
-                id: '8056262557916',
-                description: 'Kontrolliert und minimiert die Porengröße.',
-                purpose: 'Verkleinert sichtbare Poren und glättet die Haut.',
-                activeIngredients: 'Salicylsäure, Niacinamid',
-                usage: 'Tragen Sie es morgens und abends nach der Reinigung auf.'
-            },
-            'Hiperpigmentim': {
-                name: 'Vitac',
-                price: 29.99,
-                id: '8050211684572',
-                description: 'Behandelt Hyperpigmentierung und ungleichmäßigen Hautton.',
-                purpose: 'Hellere Haut und verbesserte Hautstruktur.',
-                activeIngredients: 'Vitamin C, Retinol',
-                usage: 'Tragen Sie es täglich nach der Reinigung auf die betroffenen Bereiche auf.'
-            },
-            'Rrudhat': {
-                name: 'Reti',
-                price: 21.99,
-                id: '8050211455196',
-                description: 'Pflegt empfindliche Haut und reduziert Rötungen.',
-                purpose: 'Beruhigt die Haut und mindert Rötungen.',
-                activeIngredients: 'Aloe Vera, Kamilleextrakt',
-                usage: 'Tragen Sie es sanft auf die gereinigte Haut auf.'
-            },
-            'Mirembajtje': {
-                name: 'Hydro Cleanser',
-                price: 15.99,
-                id: '8050211127516',
-                description: 'Hydratisiert und reinigt die Haut gründlich.',
-                purpose: 'Gibt der Haut Feuchtigkeit und entfernt Unreinheiten.',
-                activeIngredients: 'Hyaluronsäure, Glycerin',
-                usage: 'Mischen Sie eine kleine Menge mit Wasser und reinigen Sie Ihr Gesicht sanft.'
-            }
-        };
-
-        // === Shopify Buy Button Client Initialisierung ===
-        const client = ShopifyBuy.buildClient({
-            domain: 'lifeskin-ks-4785.myshopify.com',
-            storefrontAccessToken: '3ff7175c4f759e429a8d332922360fee',
+// === Checkout initialisieren ===
+function initializeCheckout() {
+    if (localStorage.getItem('checkoutId')) {
+        checkoutId = localStorage.getItem('checkoutId');
+    } else {
+        client.checkout.create().then((checkout) => {
+            checkoutId = checkout.id;
+            localStorage.setItem('checkoutId', checkoutId);
+        }).catch(error => {
+            console.error('Fehler beim Erstellen des Checkouts:', error);
         });
+    }
+}
 
-        let checkoutId;
+// Rufen Sie diese Funktion beim Laden der Seite auf
+initializeCheckout();
 
-        // Initialisiere oder hole den Checkout
-        function initializeCheckout() {
-            if (localStorage.getItem('checkoutId')) {
-                checkoutId = localStorage.getItem('checkoutId');
-            } else {
-                client.checkout.create().then((checkout) => {
-                    checkoutId = checkout.id;
-                    localStorage.setItem('checkoutId', checkoutId);
-                }).catch(error => {
-                    console.error('Fehler beim Erstellen des Checkouts:', error);
-                });
-            }
+/**
+ * Funktion zum Erstellen eines collapsiblen Abschnitts
+ */
+function createCollapsibleSection(title, content, isOpen = false) {
+    const section = document.createElement('div');
+    section.classList.add('collapsible-section');
+
+    const header = document.createElement('button');
+    header.classList.add('collapsible');
+
+    // Label und Pfeil
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = title;
+    header.appendChild(labelSpan);
+
+    if (isOpen) {
+        header.classList.add('active');
+    }
+
+    const contentDiv = document.createElement('div');
+    contentDiv.classList.add('content');
+    contentDiv.innerHTML = `<p>${content}</p>`;
+    if (isOpen) {
+        contentDiv.style.display = 'block';
+    }
+
+    header.addEventListener('click', function () {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+        } else {
+            content.style.display = 'block';
         }
+    });
 
-        // Rufe diese Funktion beim Laden der Seite auf
-        initializeCheckout();
+    section.appendChild(header);
+    section.appendChild(contentDiv);
 
-        /**
-         * Funktion zum Erstellen eines collapsiblen Abschnitts
-         */
-        function createCollapsibleSection(title, content, isOpen = false) {
-            const section = document.createElement('div');
-            section.classList.add('collapsible-section');
+    return section;
+}
 
-            const header = document.createElement('button');
-            header.classList.add('collapsible');
+/**
+ * Funktion zum Anzeigen der Produkt-Empfehlungen
+ */
+function displayProductRecommendations() {
+    const productsContainer = document.getElementById('products-container');
+    const selectedProblems = userResponses['question3'] || [];
 
-            // Label und Pfeil
-            const labelSpan = document.createElement('span');
-            labelSpan.textContent = title;
-            header.appendChild(labelSpan);
+    selectedProblems.forEach((problem, index) => {
+        if (productRecommendations.hasOwnProperty(problem)) {
+            const product = productRecommendations[problem];
+            const divId = `product-component-${product.id}`;
 
-            if (isOpen) {
-                header.classList.add('active');
-            }
+            // Überprüfen, ob das Produkt bereits hinzugefügt wurde, um Duplikate zu vermeiden
+            if (document.getElementById(divId)) return;
 
-            const contentDiv = document.createElement('div');
-            contentDiv.classList.add('content');
-            contentDiv.innerHTML = `<p>${content}</p>`;
-            if (isOpen) {
-                contentDiv.style.display = 'block';
-            }
+            // Erstellen eines Containers für das Produkt
+            const productDiv = document.createElement('div');
+            productDiv.id = divId;
+            productDiv.classList.add('product-item');
+            productDiv.setAttribute('data-product-id', product.id); // Datenattribut hinzufügen
+            productsContainer.appendChild(productDiv);
 
-            header.addEventListener('click', function () {
-                this.classList.toggle('active');
-                const content = this.nextElementSibling;
-                if (content.style.display === 'block') {
-                    content.style.display = 'none';
-                } else {
-                    content.style.display = 'block';
-                }
-            });
-
-            section.appendChild(header);
-            section.appendChild(contentDiv);
-
-            return section;
-        }
-
-        /**
-         * Funktion zum Anzeigen der Produkt-Empfehlungen
-         */
-        function displayProductRecommendations() {
-            const productsContainer = document.getElementById('products-container');
-            const selectedProblems = userResponses['question3'] || [];
-
-            selectedProblems.forEach((problem, index) => {
-                if (productRecommendations.hasOwnProperty(problem)) {
-                    const product = productRecommendations[problem];
-                    const divId = `product-component-${product.id}`;
-
-                    // Überprüfen, ob das Produkt bereits hinzugefügt wurde, um Duplikate zu vermeiden
-                    if (document.getElementById(divId)) return;
-
-                    // Erstellen eines Containers für das Produkt
-                    const productDiv = document.createElement('div');
-                    productDiv.id = divId;
-                    productDiv.classList.add('product-item');
-                    productsContainer.appendChild(productDiv);
-
-                    // Initialisieren des Shopify Buy Button für das Produkt
-                    ShopifyBuy.UI.onReady(client).then(function (ui) {
-                        ui.createComponent('product', {
-                            id: product.id,
-                            node: productDiv,
-                            moneyFormat: '%E2%82%AC%7B%7Bamount_with_comma_separator%7D%7D',
-                            options: {
+            // Initialisieren des Shopify Buy Button für das Produkt
+            ShopifyBuy.UI.onReady(client).then(function (ui) {
+                ui.createComponent('product', {
+                    id: product.id,
+                    node: productDiv,
+                    moneyFormat: '%E2%82%AC%7B%7Bamount_with_comma_separator%7D%7D',
+                    options: {
+                        "product": {
+                            "iframe": false, // Rendere ohne iframe
+                            "styles": {
                                 "product": {
-                                    "styles": {
-                                        "product": {
-                                            "text-align": "left", /* Alles im Produkt links ausgerichtet */
-                                            "@media (min-width: 601px)": {
-                                                "max-width": "100%",
-                                                "margin-left": "0px",
-                                                "margin-bottom": "50px"
-                                            }
-                                        },
-                                        "title": {
-                                            "font-size": "12px",
-                                            "color": "#000000",
-                                            "text-align": "left" /* Links ausgerichtet */
-                                        },
-                                        "button": {
-                                            "width": "100%",
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            ":hover": {
-                                                "background-color": "#000000"
-                                            },
-                                            "background-color": "#000000",
-                                            ":focus": {
-                                                "background-color": "#000000"
-                                            },
-                                            "border-radius": "7px"
-                                        },
-                                        "price": {
-                                            "font-size": "12px",
-                                            "color": "#000000",
-                                            "text-align": "left" /* Links ausgerichtet */
-                                        },
-                                        "compareAt": {
-                                            "font-size": "12px",
-                                            "color": "#000000",
-                                            "text-align": "left" /* Links ausgerichtet */
-                                        },
-                                        "unitPrice": {
-                                            "font-size": "12px",
-                                            "color": "#000000",
-                                            "text-align": "left" /* Links ausgerichtet */ 
-                                        }
+                                    "text-align": "left",
+                                    "@media (min-width: 601px)": {
+                                        "max-width": "100%",
+                                        "margin-left": "0px",
+                                        "margin-bottom": "50px"
+                                    }
+                                },
+                                "title": {
+                                    "font-size": "12px",
+                                    "color": "#000000",
+                                    "text-align": "left"
+                                },
+                                "button": {
+                                    "width": "100%",
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    ":hover": {
+                                        "background-color": "#000000"
                                     },
-                                    "width": "380px",
-                                    "text": {
-                                        "button": "shto në shportë"
-                                    }
-                                },
-                                "productSet": {
-                                    "styles": {
-                                        "products": {
-                                            "@media (min-width: 601px)": {
-                                                "margin-left": "-20px"
-                                            }
-                                        }
-                                    }
-                                },
-                                "modalProduct": {
-                                    "contents": {
-                                        "img": false,
-                                        "imgWithCarousel": true,
-                                        "button": false,
-                                        "buttonWithQuantity": true
+                                    "background-color": "#000000",
+                                    ":focus": {
+                                        "background-color": "#000000"
                                     },
-                                    "styles": {
-                                        "product": {
-                                            "@media (min-width: 601px)": {
-                                                "max-width": "100%",
-                                                "margin-left": "0px",
-                                                "margin-bottom": "0px"
-                                            }
-                                        },
-                                        "button": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            ":hover": {
-                                                "background-color": "#000000"
-                                            },
-                                            "background-color": "#000000",
-                                            ":focus": {
-                                                "background-color": "#000000"
-                                            },
-                                            "border-radius": "7px"
-                                        },
-                                        "title": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            "font-weight": "bold",
-                                            "font-size": "12px",
-                                            "color": "#4c4c4c"
-                                        },
-                                        "price": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            "font-weight": "normal",
-                                            "font-size": "18px",
-                                            "color": "#4c4c4c",
-                                            "text-align": "left"
-                                            
-                                        },
-                                        "compareAt": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            "font-weight": "normal",
-                                            "font-size": "15.3px",
-                                            "color": "#4c4c4c"
-                                        },
-                                        "unitPrice": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            "font-weight": "normal",
-                                            "font-size": "15.3px",
-                                            "color": "#4c4c4c",
-                                            "text-align": "left"
-                                        }
-                                    },
-                                    "text": {
-                                        "button": "Add to cart"
-                                    }
+                                    "border-radius": "7px"
                                 },
-                                "option": {},
-                                "cart": {
-                                    "styles": {
-                                        "button": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            ":hover": {
-                                                "background-color": "#000000"
-                                            },
-                                            "background-color": "#000000",
-                                            ":focus": {
-                                                "background-color": "#000000"
-                                            },
-                                            "border-radius": "7px"
-                                        },
-                                        "title": {
-                                            "color": "#000000"
-                                        },
-                                        "header": {
-                                            "color": "#000000"
-                                        },
-                                        "lineItems": {
-                                            "color": "#000000"
-                                        },
-                                        "subtotalText": {
-                                            "color": "#000000"
-                                        },
-                                        "subtotal": {
-                                            "color": "#000000"
-                                        },
-                                        "notice": {
-                                            "color": "#000000"
-                                        },
-                                        "currency": {
-                                            "color": "#000000"
-                                        },
-                                        "close": {
-                                            "color": "#000000",
-                                            ":hover": {
-                                                "color": "#000000"
-                                            }
-                                        },
-                                        "empty": {
-                                            "color": "#000000"
-                                        },
-                                        "noteDescription": {
-                                            "color": "#000000"
-                                        },
-                                        "discountText": {
-                                            "color": "#000000"
-                                        },
-                                        "discountIcon": {
-                                            "fill": "#000000"
-                                        },
-                                        "discountAmount": {
-                                            "color": "#000000"
-                                        }
-                                    },
-                                    "text": {
-                                        "title": "Shporta",
-                                        "total": "Total",
-                                        "notice": "Posta falas ",
-                                        "button": "Porosit"
-                                    }
+                                "price": {
+                                    "font-size": "12px",
+                                    "color": "#000000",
+                                    "text-align": "left"
                                 },
-                                "toggle": {
-                                    "styles": {
-                                        "toggle": {
-                                            "font-family": "Harmonia Sans, sans-serif",
-                                            "background-color": "#000000",
-                                            ":hover": {
-                                                "background-color": "#000000"
-                                            },
-                                            ":focus": {
-                                                "background-color": "#000000"
-                                            }
-                                        }
-                                    }
+                                "compareAt": {
+                                    "font-size": "12px",
+                                    "color": "#000000",
+                                    "text-align": "left"
                                 },
-                                "lineItem": {
-                                    "styles": {
-                                        "variantTitle": {
-                                            "color": "#000000"
-                                        },
-                                        "title": {
-                                            "color": "#000000"
-                                        },
-                                        "price": {
-                                            "color": "#000000"
-                                        },
-                                        "fullPrice": {
-                                            "color": "#000000"
-                                        },
-                                        "discount": {
-                                            "color": "#000000"
-                                        },
-                                        "discountIcon": {
-                                            "fill": "#000000"
-                                        },
-                                        "quantity": {
-                                            "color": "#000000"
-                                        },
-                                        "quantityIncrement": {
-                                            "color": "#000000",
-                                            "border-color": "#000000"
-                                        },
-                                        "quantityDecrement": {
-                                            "color": "#000000",
-                                            "border-color": "#000000"
-                                        },
-                                        "quantityInput": {
-                                            "color": "#000000",
-                                            "border-color": "#000000"
-                                        }
-                                    }
+                                "unitPrice": {
+                                    "font-size": "12px",
+                                    "color": "#000000",
+                                    "text-align": "left"
                                 }
                             },
-                        });
+                            "width": "380px",
+                            "text": { "button": "shto në shportë" },
+                            "events": {
+                                "afterRender": function (component) {
+                                    const addToCartButton = component.node.querySelector('button');
+                                    if (addToCartButton) {
+                                        const productId = component.model.id;
+                                        const productTitle = component.model.title;
+                                        const productPrice = component.model.variants[0].price.amount;
 
-                        // Nachdem der Buy Button erstellt wurde, fügen Sie die collapsible Sektion hinzu
-                        // Verwende setTimeout, um sicherzustellen, dass der Button gerendert wurde
-                        setTimeout(() => {
-                            // Erstellen der Collapsible Sektionen
-                            const collapsibleContainer = document.createElement('div');
-                            collapsibleContainer.classList.add('collapsible-container');
+                                        addToCartButton.setAttribute('type', 'button');
+                                        addToCartButton.classList.add('html-add-to-cart');
+                                        addToCartButton.id = `add-to-cart-${productId}`;
+                                        addToCartButton.setAttribute('data-pixel-event', 'AddToCart');
+                                        addToCartButton.setAttribute('data-product-id', productId);
+                                        addToCartButton.setAttribute('data-product-name', productTitle);
+                                        addToCartButton.setAttribute('data-product-price', productPrice);
 
-                            const sections = [
-                                { title: 'Përshkrimi', content: product.description },
-                                { title: 'Për çfarë shërben', content: product.purpose },
-                                { title: 'Substanca aktive', content: product.activeIngredients },
-                                { title: 'Përdorimi', content: product.usage },
-                                
-                            ];
-
-                            sections.forEach((section, secIndex) => {
-                                const isOpen = secIndex === 0; // Optional: Erstes Section geöffnet
-                                const collapsibleSection = createCollapsibleSection(section.title, section.content, isOpen);
-                                collapsibleContainer.appendChild(collapsibleSection);
-                            });
-
-                            // Fügen Sie die collapsible Sektion unter dem "In den Warenkorb" Button hinzu
-                            // Finden Sie den "In den Warenkorb" Button innerhalb des productDiv
-                            const buyButton = productDiv.querySelector('button');
-                            if (buyButton) {
-                                buyButton.insertAdjacentElement('afterend', collapsibleContainer);
-                            } else {
-                                // Fallback: Fügen Sie die collapsible Sektion einfach am Ende des productDiv hinzu
-                                productDiv.appendChild(collapsibleContainer);
+                                        // Pixel-Tracking für Klicks
+                                        addToCartButton.addEventListener('click', () => {
+                                            // Facebook Pixel Event
+                                            fbq('track', 'AddToCart', {
+                                                content_ids: [productId],
+                                                content_name: productTitle,
+                                                currency: 'EUR',
+                                                value: productPrice
+                                            });
+                                            // Google Analytics Event
+                                            gtag('event', 'add_to_cart', {
+                                                items: [
+                                                    {
+                                                        id: productId,
+                                                        name: productTitle,
+                                                        price: productPrice,
+                                                        quantity: 1
+                                                    }
+                                                ]
+                                            });
+                                        });
+                                    }
+                                }
                             }
-                        }, 1000); // Warte 1 Sekunde
-                    });
-                }
+                        },
+                        "cart": {
+                            "iframe": false, // Rendere ohne iframe
+                            "styles": {
+                                "button": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    ":hover": {
+                                        "background-color": "#000000"
+                                    },
+                                    "background-color": "#000000",
+                                    ":focus": {
+                                        "background-color": "#000000"
+                                    },
+                                    "border-radius": "7px"
+                                },
+                                "title": {
+                                    "color": "#000000"
+                                },
+                                "header": {
+                                    "color": "#000000"
+                                },
+                                "lineItems": {
+                                    "color": "#000000"
+                                },
+                                "subtotalText": {
+                                    "color": "#000000"
+                                },
+                                "subtotal": {
+                                    "color": "#000000"
+                                },
+                                "notice": {
+                                    "color": "#000000"
+                                },
+                                "currency": {
+                                    "color": "#000000"
+                                },
+                                "close": {
+                                    "color": "#000000",
+                                    ":hover": {
+                                        "color": "#000000"
+                                    }
+                                },
+                                "empty": {
+                                    "color": "#000000"
+                                },
+                                "noteDescription": {
+                                    "color": "#000000"
+                                },
+                                "discountText": {
+                                    "color": "#000000"
+                                },
+                                "discountIcon": {
+                                    "fill": "#000000"
+                                },
+                                "discountAmount": {
+                                    "color": "#000000"
+                                }
+                            },
+                            "text": {
+                                "title": "Shporta",
+                                "total": "Total",
+                                "notice": "Posta falas",
+                                "button": "Porosit"
+                            }
+                        },
+                        "modalProduct": {
+                            "iframe": false, // Rendere ohne iframe
+                            "contents": {
+                                "img": false,
+                                "imgWithCarousel": true,
+                                "button": false,
+                                "buttonWithQuantity": true
+                            },
+                            "styles": {
+                                "product": {
+                                    "@media (min-width: 601px)": {
+                                        "max-width": "100%",
+                                        "margin-left": "0px",
+                                        "margin-bottom": "0px"
+                                    }
+                                },
+                                "button": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    ":hover": {
+                                        "background-color": "#000000"
+                                    },
+                                    "background-color": "#000000",
+                                    ":focus": {
+                                        "background-color": "#000000"
+                                    },
+                                    "border-radius": "7px"
+                                },
+                                "title": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    "font-weight": "bold",
+                                    "font-size": "12px",
+                                    "color": "#4c4c4c"
+                                },
+                                "price": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    "font-weight": "normal",
+                                    "font-size": "18px",
+                                    "color": "#4c4c4c",
+                                    "text-align": "left"
+                                },
+                                "compareAt": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    "font-weight": "normal",
+                                    "font-size": "15.3px",
+                                    "color": "#4c4c4c"
+                                },
+                                "unitPrice": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    "font-weight": "normal",
+                                    "font-size": "15.3px",
+                                    "color": "#4c4c4c",
+                                    "text-align": "left"
+                                }
+                            },
+                            "text": {
+                                "button": "Add to cart"
+                            },
+                            "events": {
+                                "afterRender": function (component) {
+                                    const addToCartButton = component.node.querySelector('button');
+                                    if (addToCartButton) {
+                                        const productId = component.model.id;
+                                        const productTitle = component.model.title;
+                                        const productPrice = component.model.variants[0].price.amount;
+
+                                        addToCartButton.setAttribute('type', 'button');
+                                        addToCartButton.classList.add('html-add-to-cart');
+                                        addToCartButton.id = `add-to-cart-${productId}`;
+                                        addToCartButton.setAttribute('data-pixel-event', 'AddToCart');
+                                        addToCartButton.setAttribute('data-product-id', productId);
+                                        addToCartButton.setAttribute('data-product-name', productTitle);
+                                        addToCartButton.setAttribute('data-product-price', productPrice);
+
+                                        // Pixel-Tracking für Klicks
+                                        addToCartButton.addEventListener('click', () => {
+                                            // Facebook Pixel Event
+                                            fbq('track', 'AddToCart', {
+                                                content_ids: [productId],
+                                                content_name: productTitle,
+                                                currency: 'EUR',
+                                                value: productPrice
+                                            });
+                                            // Google Analytics Event
+                                            gtag('event', 'add_to_cart', {
+                                                items: [
+                                                    {
+                                                        id: productId,
+                                                        name: productTitle,
+                                                        price: productPrice,
+                                                        quantity: 1
+                                                    }
+                                                ]
+                                            });
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        "toggle": {
+                            "iframe": false, // Rendere ohne iframe
+                            "styles": {
+                                "toggle": {
+                                    "font-family": "Harmonia Sans, sans-serif",
+                                    "background-color": "#000000",
+                                    ":hover": {
+                                        "background-color": "#000000"
+                                    },
+                                    ":focus": {
+                                        "background-color": "#000000"
+                                    }
+                                }
+                            }
+                        },
+                        "lineItem": {
+                            "styles": {
+                                "variantTitle": {
+                                    "color": "#000000"
+                                },
+                                "title": {
+                                    "color": "#000000"
+                                },
+                                "price": {
+                                    "color": "#000000"
+                                },
+                                "fullPrice": {
+                                    "color": "#000000"
+                                },
+                                "discount": {
+                                    "color": "#000000"
+                                },
+                                "discountIcon": {
+                                    "fill": "#000000"
+                                },
+                                "quantity": {
+                                    "color": "#000000"
+                                },
+                                "quantityIncrement": {
+                                    "color": "#000000",
+                                    "border-color": "#000000"
+                                },
+                                "quantityDecrement": {
+                                    "color": "#000000",
+                                    "border-color": "#000000"
+                                },
+                                "quantityInput": {
+                                    "color": "#000000",
+                                    "border-color": "#000000"
+                                }
+                            }
+                        }
+                    }
+                });
+            }).catch(error => {
+                console.error('Fehler beim Initialisieren des UI:', error);
             });
+
+            // Hinzufügen der collapsible Sektionen
+            setTimeout(() => {
+                const collapsibleContainer = document.createElement('div');
+                collapsibleContainer.classList.add('collapsible-container');
+
+                const sections = [
+                    { title: 'Përshkrimi', content: product.description },
+                    { title: 'Për çfarë shërben', content: product.purpose },
+                    { title: 'Substanca aktive', content: product.activeIngredients },
+                    { title: 'Përdorimi', content: product.usage },
+                ];
+
+                sections.forEach((section, secIndex) => {
+                    const isOpen = secIndex === 0;
+                    const collapsibleSection = createCollapsibleSection(section.title, section.content, isOpen);
+                    collapsibleContainer.appendChild(collapsibleSection);
+                });
+
+                const buyButton = productDiv.querySelector('button');
+                if (buyButton) {
+                    buyButton.insertAdjacentElement('afterend', collapsibleContainer);
+                } else {
+                    productDiv.appendChild(collapsibleContainer);
+                }
+            }, 1000);
         }
+    });
+}
 
-
-
-        // Rufe die Funktion auf, um die Empfehlungen anzuzeigen, nachdem das DOM geladen ist
-        document.addEventListener('DOMContentLoaded', function () {
-            displayProductRecommendations();
-        });
-
+// Rufe die Funktion auf, um die Empfehlungen anzuzeigen, nachdem das DOM geladen ist
+document.addEventListener('DOMContentLoaded', function () {
+    displayProductRecommendations();
+});
 
 
 
