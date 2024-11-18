@@ -311,8 +311,8 @@ button {
 /* Button zum Schließen */
 .close-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 40px;
+    right: 40px;
     background-color: white;
     color: black;
     padding: 10px;
@@ -350,8 +350,8 @@ button {
         width: 110px;
         height: auto;
         margin-top: 170px;
-        margin-left: -125px;
-        margin-right: 20px;
+        margin-left: -90px;
+        margin-right: 10px;
     }
 
     #takePhotoButton {
@@ -386,17 +386,7 @@ button {
     }
 }
 
-.sticky-bar {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 1000;
-    background-color: #fff;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px;
-}
+
 
 .nav-button {
     padding: 10px 20px;
@@ -1164,3 +1154,27 @@ input[type="text"] {
 
 
 
+
+/* Stil für die Anleitungsbox */
+.instruction-box {
+    border: 2px solid #000000; /* Blaue Umrandung */
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #f9f9f9; /* Hellgrauer Hintergrund */
+    border-radius: 5px; /* Abgerundete Ecken */
+}
+
+/* Stil für den Anleitungsinhalt */
+.instruction-box p {
+    margin: 0;
+    font-size: 12px;
+    color: #555;
+}
+
+/* Responsive Design für die Anleitungsbox */
+@media (max-width: 600px) {
+    .instruction-box {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
