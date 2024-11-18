@@ -46,7 +46,9 @@ const productRecommendations = {
         description: 'Lifeskin Benzoyl Peroxide 5% përmban formulën unike ,një sekret i vërtetë për një lëkurë të shëndetshme.',
         purpose: 'Largon aknet hormonale dhe bakteriale dhe shenjat nga aknet',
         activeIngredients: 'Benzoylperoxid 5%',
-        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
+        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.',
+        size: '30mL', // Größe hinzufügen
+        origin: 'Made in Germany' // Herkunft hinzufügen
     },
     'Poret': {
         name: 'Pore Control',
@@ -86,30 +88,13 @@ const productRecommendations = {
     }
 };
 
+
+
 // === Shopify Buy Button Client Initialisierung ===
 const client = ShopifyBuy.buildClient({
     domain: 'lifeskin-ks-4785.myshopify.com',
     storefrontAccessToken: '3ff7175c4f759e429a8d332922360fee',
 });
-
-
-
-// === Checkout initialisieren ===
-function initializeCheckout() {
-    if (localStorage.getItem('checkoutId')) {
-        checkoutId = localStorage.getItem('checkoutId');
-    } else {
-        client.checkout.create().then((checkout) => {
-            checkoutId = checkout.id;
-            localStorage.setItem('checkoutId', checkoutId);
-        }).catch(error => {
-            console.error('Fehler beim Erstellen des Checkouts:', error);
-        });
-    }
-}
-
-// Rufen Sie diese Funktion beim Laden der Seite auf
-initializeCheckout();
 
 /**
  * Funktion zum Erstellen eines collapsiblen Abschnitts
@@ -121,7 +106,7 @@ function createCollapsibleSection(title, content, isOpen = false) {
     const header = document.createElement('button');
     header.classList.add('collapsible');
 
-    // Label und Pfeil
+    // Label
     const labelSpan = document.createElement('span');
     labelSpan.textContent = title;
     header.appendChild(labelSpan);
@@ -133,17 +118,14 @@ function createCollapsibleSection(title, content, isOpen = false) {
     const contentDiv = document.createElement('div');
     contentDiv.classList.add('content');
     contentDiv.innerHTML = `<p>${content}</p>`;
-    if (isOpen) {
-        contentDiv.style.display = 'block';
-    }
+    contentDiv.style.display = isOpen ? 'block' : 'none';
 
     header.addEventListener('click', function () {
         this.classList.toggle('active');
-        const content = this.nextElementSibling;
-        if (content.style.display === 'block') {
-            content.style.display = 'none';
+        if (contentDiv.style.display === 'block') {
+            contentDiv.style.display = 'none';
         } else {
-            content.style.display = 'block';
+            contentDiv.style.display = 'block';
         }
     });
 
@@ -160,337 +142,247 @@ function displayProductRecommendations() {
     const productsContainer = document.getElementById('products-container');
     const selectedProblems = userResponses['question3'] || [];
 
-    selectedProblems.forEach((problem, index) => {
-        if (productRecommendations.hasOwnProperty(problem)) {
-            const product = productRecommendations[problem];
-            const divId = `product-component-${product.id}`;
+    // Initialisieren des Shopify Buy Button UI einmalig
+    ShopifyBuy.UI.onReady(client).then(function (ui) {
+        const moneyFormat = '€{{amount_with_comma_separator}}'; // Globale moneyFormat-Einstellung
 
-            // Überprüfen, ob das Produkt bereits hinzugefügt wurde, um Duplikate zu vermeiden
-            if (document.getElementById(divId)) return;
+        // Initialisieren des Warenkorbs inline, nicht als Popup
+        ui.createComponent('cart', {
+            moneyFormat: moneyFormat,
+            options: {
+                "cart": {
+                    "popup": false, // Deaktivieren des Popups
+                    "styles": {
+                        "button": {
+                            "background-color": "#000000",
+                            "color": "#ffffff",
+                            "padding": "15px",
+                            "font-size": "16px",
+                            "font-weight": "bold",
+                            "border": "none",
+                            "border-radius": "5px",
+                            "cursor": "pointer",
+                            "text-transform": "none"
+                        },
+                        "button:hover": {
+                            "background-color": "#333333"
+                        },
+                        "button:focus": {
+                            "background-color": "#000000"
+                        }
+                    },
+                    "text": {
+                        "title": "Shporta",
+                        "total": "Total",
+                        "notice": "Posta falas",
+                        "button": "Porosit" // "Checkout" auf Albanisch
+                    }
+                }
+            }
+        });
 
-            // Erstellen eines Containers für das Produkt
-            const productDiv = document.createElement('div');
-            productDiv.id = divId;
-            productDiv.classList.add('product-item');
-            productDiv.setAttribute('data-product-id', product.id); // Datenattribut hinzufügen
-            productsContainer.appendChild(productDiv);
+        // Event-Delegation für Tracking ohne Interferenzen
+        document.addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('html-add-to-cart')) {
+                const productId = event.target.getAttribute('data-product-id');
+                const productName = event.target.getAttribute('data-product-name');
+                const productPrice = parseFloat(event.target.getAttribute('data-product-price'));
 
-            // Initialisieren des Shopify Buy Button für das Produkt
-            ShopifyBuy.UI.onReady(client).then(function (ui) {
+                // Facebook Pixel Event
+                if (typeof fbq === 'function') { // Überprüfen, ob fbq definiert ist
+                    fbq('track', 'AddToCart', {
+                        content_ids: [productId],
+                        content_name: productName,
+                        currency: 'EUR',
+                        value: productPrice
+                    });
+                }
+            }
+        });
+
+        // Iterieren über die ausgewählten Probleme
+        selectedProblems.forEach((problem, index) => {
+            if (productRecommendations.hasOwnProperty(problem)) {
+                const product = productRecommendations[problem];
+                const divId = `product-component-${product.id}`;
+
+                // Überprüfen, ob das Produkt bereits hinzugefügt wurde, um Duplikate zu vermeiden
+                if (document.getElementById(divId)) return;
+
+                // Erstellen eines Containers für das Produkt
+                const productDiv = document.createElement('div');
+                productDiv.id = divId;
+                productDiv.classList.add('product-item');
+                productDiv.setAttribute('data-product-id', product.id);
+                productsContainer.appendChild(productDiv);
+
+                // Erstellen von Containern für jedes Element
+                const imageContainer = document.createElement('div');
+                const titleContainer = document.createElement('div');
+                titleContainer.classList.add('spacing-adjustable');
+                const madeInContainer = document.createElement('div');
+                const sizeContainer = document.createElement('div');
+                const priceContainer = document.createElement('div');
+                const buttonContainer = document.createElement('div');
+
+                // Fügen Sie die Container in der gewünschten Reihenfolge hinzu
+                productDiv.appendChild(imageContainer);
+                productDiv.appendChild(titleContainer);
+                productDiv.appendChild(madeInContainer);
+                productDiv.appendChild(sizeContainer);
+                productDiv.appendChild(priceContainer);
+                productDiv.appendChild(buttonContainer);
+
+                // Rendern des Produktbilds ohne iframe
                 ui.createComponent('product', {
                     id: product.id,
-                    node: productDiv,
-                    moneyFormat: '%E2%82%AC%7B%7Bamount_with_comma_separator%7D%7D',
+                    moneyFormat: moneyFormat,
+                    node: imageContainer,
                     options: {
                         "product": {
-                            "iframe": false, // Rendere ohne iframe
-                            "styles": {
-                                "product": {
-                                    "text-align": "left",
-                                    "@media (min-width: 601px)": {
-                                        "max-width": "100%",
-                                        "margin-left": "0px",
-                                        "margin-bottom": "50px"
-                                    }
-                                },
-                                "title": {
-                                    "font-size": "12px",
-                                    "color": "#000000",
-                                    "text-align": "left"
-                                },
-                                "button": {
-                                    "width": "100%",
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    "background-color": "#000000",
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    },
-                                    "border-radius": "7px"
-                                },
-                                "price": {
-                                    "font-size": "12px",
-                                    "color": "#000000",
-                                    "text-align": "left"
-                                },
-                                "compareAt": {
-                                    "font-size": "12px",
-                                    "color": "#000000",
-                                    "text-align": "left"
-                                },
-                                "unitPrice": {
-                                    "font-size": "12px",
-                                    "color": "#000000",
-                                    "text-align": "left"
-                                }
-                            },
-                            "width": "380px",
-                            "text": { "button": "shto në shportë" },
-                            "events": {
-                                "afterRender": function (component) {
-                                    const addToCartButton = component.node.querySelector('button');
-                                    if (addToCartButton) {
-                                        const productId = component.model.id;
-                                        const productTitle = component.model.title;
-                                        const productPrice = component.model.variants[0].price.amount;
-
-                                        addToCartButton.setAttribute('type', 'button');
-                                        addToCartButton.classList.add('html-add-to-cart');
-                                        addToCartButton.id = `add-to-cart-${productId}`;
-                                        addToCartButton.setAttribute('data-pixel-event', 'AddToCart');
-                                        addToCartButton.setAttribute('data-product-id', productId);
-                                        addToCartButton.setAttribute('data-product-name', productTitle);
-                                        addToCartButton.setAttribute('data-product-price', productPrice);
-
-                                        // Pixel-Tracking für Klicks
-                                        addToCartButton.addEventListener('click', () => {
-                                            // Facebook Pixel Event
-                                            fbq('track', 'AddToCart', {
-                                                content_ids: [productId],
-                                                content_name: productTitle,
-                                                currency: 'EUR',
-                                                value: productPrice
-                                            });
-                                            // Google Analytics Event
-                                            gtag('event', 'add_to_cart', {
-                                                items: [
-                                                    {
-                                                        id: productId,
-                                                        name: productTitle,
-                                                        price: productPrice,
-                                                        quantity: 1
-                                                    }
-                                                ]
-                                            });
-                                        });
-                                    }
-                                }
-                            }
-                        },
-                        "cart": {
-                            "iframe": false, // Rendere ohne iframe
-                            "styles": {
-                                "button": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    "background-color": "#000000",
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    },
-                                    "border-radius": "7px"
-                                },
-                                "title": {
-                                    "color": "#000000"
-                                },
-                                "header": {
-                                    "color": "#000000"
-                                },
-                                "lineItems": {
-                                    "color": "#000000"
-                                },
-                                "subtotalText": {
-                                    "color": "#000000"
-                                },
-                                "subtotal": {
-                                    "color": "#000000"
-                                },
-                                "notice": {
-                                    "color": "#000000"
-                                },
-                                "currency": {
-                                    "color": "#000000"
-                                },
-                                "close": {
-                                    "color": "#000000",
-                                    ":hover": {
-                                        "color": "#000000"
-                                    }
-                                },
-                                "empty": {
-                                    "color": "#000000"
-                                },
-                                "noteDescription": {
-                                    "color": "#000000"
-                                },
-                                "discountText": {
-                                    "color": "#000000"
-                                },
-                                "discountIcon": {
-                                    "fill": "#000000"
-                                },
-                                "discountAmount": {
-                                    "color": "#000000"
-                                }
-                            },
-                            "text": {
-                                "title": "Shporta",
-                                "total": "Total",
-                                "notice": "Posta falas",
-                                "button": "Porosit"
-                            }
-                        },
-                        "modalProduct": {
-                            "iframe": false, // Rendere ohne iframe
+                            "iframe": false,
                             "contents": {
-                                "img": false,
-                                "imgWithCarousel": true,
-                                "button": false,
-                                "buttonWithQuantity": true
+                                "img": true,
+                                "title": false,
+                                "price": false,
+                                "button": false
                             },
                             "styles": {
-                                "product": {
-                                    "@media (min-width: 601px)": {
-                                        "max-width": "100%",
-                                        "margin-left": "0px",
-                                        "margin-bottom": "0px"
-                                    }
-                                },
-                                "button": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    "background-color": "#000000",
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    },
-                                    "border-radius": "7px"
-                                },
-                                "title": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    "font-weight": "bold",
-                                    "font-size": "12px",
-                                    "color": "#4c4c4c"
-                                },
-                                "price": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    "font-weight": "normal",
-                                    "font-size": "18px",
-                                    "color": "#4c4c4c",
-                                    "text-align": "left"
-                                },
-                                "compareAt": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    "font-weight": "normal",
-                                    "font-size": "15.3px",
-                                    "color": "#4c4c4c"
-                                },
-                                "unitPrice": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    "font-weight": "normal",
-                                    "font-size": "15.3px",
-                                    "color": "#4c4c4c",
-                                    "text-align": "left"
-                                }
-                            },
-                            "text": {
-                                "button": "Add to cart"
-                            },
-                            "events": {
-                                "afterRender": function (component) {
-                                    const addToCartButton = component.node.querySelector('button');
-                                    if (addToCartButton) {
-                                        const productId = component.model.id;
-                                        const productTitle = component.model.title;
-                                        const productPrice = component.model.variants[0].price.amount;
-
-                                        addToCartButton.setAttribute('type', 'button');
-                                        addToCartButton.classList.add('html-add-to-cart');
-                                        addToCartButton.id = `add-to-cart-${productId}`;
-                                        addToCartButton.setAttribute('data-pixel-event', 'AddToCart');
-                                        addToCartButton.setAttribute('data-product-id', productId);
-                                        addToCartButton.setAttribute('data-product-name', productTitle);
-                                        addToCartButton.setAttribute('data-product-price', productPrice);
-
-                                        // Pixel-Tracking für Klicks
-                                        addToCartButton.addEventListener('click', () => {
-                                            // Facebook Pixel Event
-                                            fbq('track', 'AddToCart', {
-                                                content_ids: [productId],
-                                                content_name: productTitle,
-                                                currency: 'EUR',
-                                                value: productPrice
-                                            });
-                                            // Google Analytics Event
-                                            gtag('event', 'add_to_cart', {
-                                                items: [
-                                                    {
-                                                        id: productId,
-                                                        name: productTitle,
-                                                        price: productPrice,
-                                                        quantity: 1
-                                                    }
-                                                ]
-                                            });
-                                        });
-                                    }
-                                }
-                            }
-                        },
-                        "toggle": {
-                            "iframe": false, // Rendere ohne iframe
-                            "styles": {
-                                "toggle": {
-                                    "font-family": "Harmonia Sans, sans-serif",
-                                    "background-color": "#000000",
-                                    ":hover": {
-                                        "background-color": "#000000"
-                                    },
-                                    ":focus": {
-                                        "background-color": "#000000"
-                                    }
-                                }
-                            }
-                        },
-                        "lineItem": {
-                            "styles": {
-                                "variantTitle": {
-                                    "color": "#000000"
-                                },
-                                "title": {
-                                    "color": "#000000"
-                                },
-                                "price": {
-                                    "color": "#000000"
-                                },
-                                "fullPrice": {
-                                    "color": "#000000"
-                                },
-                                "discount": {
-                                    "color": "#000000"
-                                },
-                                "discountIcon": {
-                                    "fill": "#000000"
-                                },
-                                "quantity": {
-                                    "color": "#000000"
-                                },
-                                "quantityIncrement": {
-                                    "color": "#000000",
-                                    "border-color": "#000000"
-                                },
-                                "quantityDecrement": {
-                                    "color": "#000000",
-                                    "border-color": "#000000"
-                                },
-                                "quantityInput": {
-                                    "color": "#000000",
-                                    "border-color": "#000000"
+                                "img": {
+                                    "border-radius": "5px",
+                                    "margin-bottom": "15px"
                                 }
                             }
                         }
                     }
                 });
-            }).catch(error => {
-                console.error('Fehler beim Initialisieren des UI:', error);
-            });
 
-            // Hinzufügen der collapsible Sektionen
-            setTimeout(() => {
+                // Rendern des Produkttitels ohne iframe
+                ui.createComponent('product', {
+                    id: product.id,
+                    moneyFormat: moneyFormat,
+                    node: titleContainer,
+                    options: {
+                        "product": {
+                            "iframe": false,
+                            "contents": {
+                                "img": false,
+                                "title": true,
+                                "price": false,
+                                "button": false
+                            },
+                            "styles": {
+                                "title": {
+                                    "font-size": "20px",
+                                    "color": "#333333",
+                                    "font-weight": "bold",
+                                    "margin-bottom": "10px",
+                                    "text-align": "left"
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // "Made in Germany" hinzufügen
+                madeInContainer.classList.add('made-in');
+                madeInContainer.textContent = product.origin;
+
+                // "30mL" hinzufügen
+                sizeContainer.classList.add('product-size');
+                sizeContainer.textContent = product.size;
+
+                // Rendern des Preises innerhalb eines iframes
+                ui.createComponent('product', {
+                    id: product.id,
+                    moneyFormat: moneyFormat,
+                    node: priceContainer,
+                    options: {
+                        "product": {
+                            "iframe": true,
+                            "contents": {
+                                "img": false,
+                                "title": false,
+                                "price": true,
+                                "button": false
+                            },
+                            "styles": {
+                                "product": {
+                                    "text-align": "left"
+                                },
+                                "price": {
+                                    "font-size": "14px",
+                                    "color": "#000000"
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Rendern des "Add to Cart" Buttons ohne iframe
+                ui.createComponent('product', {
+                    id: product.id,
+                    moneyFormat: moneyFormat,
+                    node: buttonContainer,
+                    options: {
+                        "product": {
+                            "iframe": false,
+                            "contents": {
+                                "img": false,
+                                "title": false,
+                                "price": false,
+                                "button": true
+                            },
+                            "text": {
+                                "button": "Shto në Shportë" // "Add to Cart" auf Albanisch
+                            },
+                            "styles": {
+                                "button": {
+                                    "width": "100%",
+                                    "background-color": "#000000",
+                                    "color": "#ffffff",
+                                    "padding": "15px",
+                                    "font-size": "16px",
+                                    "font-weight": "normal !important",
+                                    "border": "none",
+                                    "border-radius": "5px",
+                                    "cursor": "pointer",
+                                    "text-transform": "none"
+                                },
+                                "button:hover": {
+                                    "background-color": "#333333"
+                                },
+                                "button:focus": {
+                                    "background-color": "#000000"
+                                }
+                            },
+                            "events": {
+                                "afterRender": function (component) {
+                                    const addToCartButton = component.node.querySelector('button');
+                                    if (addToCartButton) {
+                                        const productId = component.model.id;
+                                        const productTitle = component.model.title;
+                                        const productPrice = component.model.variants[0].price.amount;
+
+                                        // Entfernen Sie die folgende Zeile, um den Button-Typ nicht zu ändern
+                                        // addToCartButton.setAttribute('type', 'button');
+
+                                        addToCartButton.classList.add('html-add-to-cart');
+                                        addToCartButton.id = `add-to-cart-${productId}`;
+                                        addToCartButton.setAttribute('data-pixel-event', 'AddToCart');
+                                        addToCartButton.setAttribute('data-product-id', productId);
+                                        addToCartButton.setAttribute('data-product-name', productTitle);
+                                        addToCartButton.setAttribute('data-product-price', productPrice);
+
+                                        // Pixel-Tracking wird jetzt durch Event-Delegation gehandhabt
+                                    }
+                                }
+                            }
+                        } // Ende von "product"
+                    }
+                });
+
+                // Hinzufügen der collapsible Sektionen
                 const collapsibleContainer = document.createElement('div');
                 collapsibleContainer.classList.add('collapsible-container');
 
@@ -498,7 +390,7 @@ function displayProductRecommendations() {
                     { title: 'Përshkrimi', content: product.description },
                     { title: 'Për çfarë shërben', content: product.purpose },
                     { title: 'Substanca aktive', content: product.activeIngredients },
-                    { title: 'Përdorimi', content: product.usage },
+                    { title: 'Përdorimi', content: product.usage }
                 ];
 
                 sections.forEach((section, secIndex) => {
@@ -507,14 +399,24 @@ function displayProductRecommendations() {
                     collapsibleContainer.appendChild(collapsibleSection);
                 });
 
-                const buyButton = productDiv.querySelector('button');
-                if (buyButton) {
-                    buyButton.insertAdjacentElement('afterend', collapsibleContainer);
-                } else {
-                    productDiv.appendChild(collapsibleContainer);
-                }
-            }, 1000);
+                productDiv.appendChild(collapsibleContainer);
+            }
+        });
+
+        // Implementierung der direkten Checkout-Funktion
+        const checkoutButton = document.getElementById('direct-checkout-button');
+        if (checkoutButton) {
+            checkoutButton.addEventListener('click', () => {
+                // Holen Sie sich die aktuelle Checkout-Session
+                client.checkout.create().then((checkout) => {
+                    window.location.href = checkout.webUrl; // Weiterleitung im selben Fenster
+                }).catch(error => {
+                    console.error('Fehler beim Erstellen des Checkouts:', error);
+                });
+            });
         }
+    }).catch(error => {
+        console.error('Fehler beim Initialisieren des UI:', error);
     });
 }
 
@@ -522,12 +424,6 @@ function displayProductRecommendations() {
 document.addEventListener('DOMContentLoaded', function () {
     displayProductRecommendations();
 });
-
-
-
-
-
-
 
 
 
@@ -737,46 +633,85 @@ function updateSensitivityValue(value) {
 // === Kamerafunktionen ===
 
 /**
- * Öffnet die Kamera und initialisiert FaceMesh zur Gesichtserkennung.
+ * Öffnet die Kamera und initialisiert FaceMesh zur Gesichtserkennung mit einem Ladebildschirm.
  */
 async function openCamera() {
+    const loadingScreen = document.getElementById("loadingScreen");
+    // Der Ladebildschirm wird hier nicht angezeigt
+
     const video = document.getElementById('cameraView');
     const overlay = document.getElementById('overlay');
     const ctx = overlay.getContext('2d');
 
     try {
-        // Zugriff auf die Video-Stream der Kamera
+        // Zugriff auf den Video-Stream der Kamera
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "user" }
         });
         video.srcObject = stream;
         activeCameraStream = stream;
 
-        video.onloadedmetadata = () => {
-            console.log("Meta-Daten der Video geladen");
-            video.play().then(() => {
-                console.log("Video wird abgespielt");
-                document.getElementById("cameraContainer").style.display = "block";
-                // Verbergen des Fragebogens
-                document.getElementById("question-container").style.display = "none";
-                // Anzeigen relevanter UI-Elemente
-                document.getElementById('topBorder').style.display = 'block';
-                document.getElementById('bottomBorder').style.display = 'block';
-                document.getElementById('buttonLogoContainer').style.display = 'flex';
-                document.getElementById('closeButton').style.display = 'block';
-                disableGestures();
-                resizeVideoOverlay(video, overlay);
-                initializeFaceMesh(video, overlay, ctx);
-                window.addEventListener('resize', () => resizeVideoOverlay(video, overlay));
-            }).catch(error => {
-                console.error("Fehler beim Abspielen des Videos: ", error);
-            });
-        };
+        // Erstellen einer Promise, die auf das Starten des Videos wartet
+        await new Promise((resolve, reject) => {
+            // Sobald die Metadaten geladen sind
+            video.onloadedmetadata = () => {
+                console.log("Meta-Daten des Videos geladen");
+
+                // Versuchen, das Video abzuspielen
+                video.play().then(() => {
+                    console.log("Video wird abgespielt");
+
+                    // Sobald das Video zu spielen beginnt, zeigen wir den Ladebildschirm an
+                    if (loadingScreen) {
+                        loadingScreen.style.display = "flex"; // Ladebildschirm anzeigen
+                    }
+
+                    // Startzeit für die Mindestanzeigezeit von 3,5 Sekunden
+                    const loadingStartTime = Date.now();
+
+                    // Anzeigen der Kamera-UI-Elemente
+                    document.getElementById("cameraContainer").style.display = "block";
+                    // Verbergen des Fragebogens
+                    document.getElementById("question-container").style.display = "none";
+                    // Anzeigen relevanter UI-Elemente
+                    document.getElementById('topBorder').style.display = 'block';
+                    document.getElementById('bottomBorder').style.display = 'block';
+                    document.getElementById('buttonLogoContainer').style.display = 'flex';
+                    document.getElementById('closeButton').style.display = 'block';
+                    disableGestures();
+                    resizeVideoOverlay(video, overlay);
+                    initializeFaceMesh(video, overlay, ctx);
+                    window.addEventListener('resize', () => resizeVideoOverlay(video, overlay));
+
+                    // Starten der Mindestwartezeit von 3,5 Sekunden
+                    setTimeout(() => {
+                        if (loadingScreen) {
+                            loadingScreen.style.display = "none"; // Ladebildschirm ausblenden
+                        }
+                        resolve(); // Kamera ist bereit und Mindestwartezeit ist abgelaufen
+                    }, 3500);
+                }).catch(error => {
+                    console.error("Fehler beim Abspielen des Videos: ", error);
+                    reject(error);
+                });
+            };
+
+            // Optional: Fehlerbehandlung für das Laden der Metadaten
+            video.onerror = (error) => {
+                console.error("Fehler beim Laden der Video-Metadaten: ", error);
+                reject(error);
+            };
+        });
+
     } catch (error) {
         console.error("Fehler beim Öffnen der Kamera: ", error);
         alert("Kamera kann nicht geöffnet werden. Bitte stellen Sie sicher, dass Sie den Zugriff erlaubt haben.");
+        if (loadingScreen) {
+            loadingScreen.style.display = "none"; // Ladebildschirm im Fehlerfall ausblenden
+        }
     }
 }
+
 
 /**
  * Passt die Größe von Video und Overlay an die Fenstergröße an.
