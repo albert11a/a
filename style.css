@@ -466,6 +466,7 @@ button {
     text-align: left;
 }
 
+/* Zeilen */
 .row {
     display: flex;
     justify-content: space-around;
@@ -474,20 +475,26 @@ button {
     gap: 15px;
 }
 
+/* Einzelne Ergebnisboxen */
 .result-box {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: left;
+    padding: 20px; /* Innenabstand */
+    border: 1px solid #e5e5e5; /* Hellgrauer Rand */
+    border-radius: 10px; /* Abgerundete Ecken */
+    background-color: #ffffff; /* Weißer Hintergrund */
+    box-sizing: border-box; /* Sorgt dafür, dass Padding und Border in der Gesamtgröße berücksichtigt werden */
 }
 
-/* Label für alle Kreise und Balken - jetzt über den Kreisen */
+/* Label für alle Kreise und Balken */
 .label {
     font-size: 0.9rem;
     color: #333;
     font-family: "Harmonia Sans", sans-serif;
-    margin-bottom: 5px; /* Abstand zum Kreis */
+    margin-bottom: 10px; /* Abstand zum Kreis */
     text-align: center;
 }
 
@@ -498,41 +505,45 @@ button {
     height: 100px;
     border-radius: 50%;
     background: conic-gradient(
-        black calc(var(--percentage, 0) * 1%),
-        #F6F6F7 0%
+        black 0deg,
+        black calc(var(--percentage, 0) * 3.6deg),
+        #F6F6F7 calc(var(--percentage, 0) * 3.6deg),
+        #F6F6F7 360deg
     );
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 10px; /* Abstand nach unten */
 }
 
+/* Weißer Kreis in der Mitte */
+.progress-circle::after {
+    content: '';
+    position: absolute;
+    width: 80px; /* Größe des inneren weißen Kreises */
+    height: 80px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* Prozentzahl im Zentrum */
 .progress-circle::before {
     content: attr(data-percentage) '%';
     position: absolute;
     color: #333;
     font-size: 0.9rem;
     font-weight: bold;
+    z-index: 2;
 }
 
 /* Dynamische Befüllung basierend auf Daten */
-.progress-circle[data-percentage='50'] {
-    --percentage: 50;
-}
-.progress-circle[data-percentage='30'] {
-    --percentage: 30;
-}
-.progress-circle[data-percentage='20'] {
-    --percentage: 20;
-}
-.progress-circle[data-percentage='60'] {
-    --percentage: 60;
-}
-.progress-circle[data-percentage='40'] {
-    --percentage: 40;
-}
-.progress-circle[data-percentage='70'] {
-    --percentage: 70;
-}
+.progress-circle[data-percentage='20'] { --percentage: 20; }
+.progress-circle[data-percentage='30'] { --percentage: 30; }
+.progress-circle[data-percentage='40'] { --percentage: 40; }
+.progress-circle[data-percentage='50'] { --percentage: 50; }
+.progress-circle[data-percentage='60'] { --percentage: 60; }
+.progress-circle[data-percentage='70'] { --percentage: 70; }
 
 /* Linearer Fortschrittsbalken für Elasticiteti und Barriera */
 .progress-bar {
@@ -553,13 +564,103 @@ button {
     background-color: black;
 }
 
-.progress-bar[data-percentage='55'] {
-    --percentage: 55;
+.progress-bar[data-percentage='25'] { --percentage: 25; }
+.progress-bar[data-percentage='55'] { --percentage: 55; }
+
+/* Anpassung für kleine Texte unter den Balken */
+small {
+    font-size: 0.8rem;
+    color: #333;
+    margin-top: 5px;
 }
 
-.progress-bar[data-percentage='25'] {
-    --percentage: 25;
+/* Mobile-Optimierung */
+@media (max-width: 600px) {
+    .progress-circle {
+        width: 70px;
+        height: 70px;
+    }
+    .progress-circle::after {
+        width: 55px;
+        height: 55px;
+    }
+    .row {
+        gap: 10px;
+    }
+    .label {
+        font-size: 0.8rem;
+    }
+    .progress-bar {
+        width: 70px;
+        height: 10px;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Neue Zeile für Status-Texte */
+.status-text-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    gap: 15px;
+    padding: 20px;
+    border: 1px solid #e5e5e5; /* Hellgrauer Rand */
+    border-radius: 10px; /* Abgerundete Ecken */
+    background-color: #ffffff; /* Weißer Hintergrund */
+    box-sizing: border-box;
+}
+
+/* Einzelne Status-Texte */
+.status-text {
+    flex: 1;
+    text-align: center;
+    font-family: "Harmonia Sans", sans-serif;
+    border-radius: 5px; /* Abgerundete Ecken */
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 0.7rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Anpassung für kleine Texte unter den Balken */
 small {
@@ -784,40 +885,34 @@ input[type="text"] {
 
 
 
-/* Produktempfehlungen */
-.products-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Zentriert die Produkte */
-    gap: 20px;
-    padding: 20px;
-}
-
-.product-item {
-    border: 1px solid #ccc;
-    border-radius: 10px; /* Abgerundete Ecken */
-    padding: 20px;
-    width: 300px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-}
 
 
 
-.add-to-cart-button {
-    background-color: #000;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 10px; /* Abgerundete Ecken */
-    cursor: pointer;
-    margin-top: 10px;
-    width: 100%;
-}
 
-.add-to-cart-button:hover {
-    background-color: #333;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .content {
@@ -828,95 +923,16 @@ input[type="text"] {
     border-radius: 5px;
     
 }
-
-/* Warenkorb-Icon */
-.cart-icon {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background-image: url('path-to-cart-icon.svg'); /* Pfad zum Warenkorb-Icon */
-    background-size: cover;
-    cursor: pointer;
-    z-index: 1000;
-    display: none; /* Standardmäßig versteckt */
-}
-
-.cart-icon.active {
-    display: block;
-}
-
-
-/* Produkt-Container */
-.product-item {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    width: 100%; /* Volle Breite innerhalb des Elterncontainers */
-    max-width: 500px; /* Maximalbreite für größere Bildschirme */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-    margin-bottom: 20px;
-}
-
 .product-item img {
     width: 100%; /* Bild nimmt die volle Breite des Containers ein */
     border-radius: var(--product-image-border-radius);
     max-height: 300px; /* Optional: Begrenze die Höhe des Bildes */
     object-fit: cover;
 }
-
-
-
-
-/* Schriftgrößensteuerung */
-.font-size-controls {
-    margin: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.font-size-controls label {
-    font-family: 'Harmonia Sans', sans-serif;
-    font-size: var(--font-size-medium);
-}
-
-
-/* Button mit automatischer Breite */
-button.add-to-cart {
-    width: 100%; /* Automatische Breite */
-    padding: 10px 20px; /* Optional: Padding für besseren Look */
-    font-size: 16px;
-    background-color: #000000;
-    color: #ffffff;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    border-radius: 5px;
-}
-
-.add-to-cart-button:hover {
-    background-color: var(--color-button-hover-bg);
-}
-
-
-
-/* Optional: Responsive Anpassungen */
-@media (max-width: 600px) {
-    .product-item {
-        max-width: 100%;
-    }
-}
-
-
-
 .collapsible-section {
     margin: 15px 0;
     border-bottom: 1px solid #E5E5E5;
 }
-
 .collapsible {
     background-color: transparent; /* Transparenter Hintergrund */
     color: #333333;
@@ -932,18 +948,15 @@ button.add-to-cart {
     align-items: center;
     padding: 10px 0;
 }
-
 .collapsible::after {
     content: "▼";
     font-size: 14px;
     color: #333333;
     transition: transform 0.3s ease;
 }
-
 .collapsible.active::after {
     transform: rotate(180deg);
 }
-
 .content {
     max-height: auto;
     overflow: hidden;
@@ -959,25 +972,195 @@ button.add-to-cart {
 
 
 
-.product-title {
-    text-align: left; /* Links ausgerichtet */
-    font-size: 18px;
+
+
+
+
+/* === Produkt-Stile === */
+
+/* Produkt-Item (einzelnes Produkt) */
+.product-item {
+    width: 100%;
+    max-width: 600px; /* Maximale Breite des Produkts */
+    margin-bottom: 40px; /* Abstand nach unten zwischen Produkten */
+    padding: 20px; /* Innenabstand innerhalb des Produkts */
+    border: 1px solid #e5e5e5; /* Hellgrauer Rahmen */
+    border-radius: 10px; /* Abgerundete Ecken */
+    background-color: #ffffff; /* Weißer Hintergrund */
+
+}
+
+/* Zentriert das Produkt innerhalb des Containers */
+.product-item {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* === Shopify Buy Button Komponenten-Stile === */
+
+/* Produktbild */
+.shopify-buy__product__image-wrapper {
+    text-align: center; /* Bild zentrieren */
+    margin-bottom: 80px; /* Abstand unterhalb des Bildes */
+}
+
+.shopify-buy__product__image {
+    max-width: 100%; /* Bild passt sich der Containergröße an */
+    height: auto;
+    border-radius: 10px; /* Abgerundete Ecken für das Bild */
+}
+
+/* Produkttitel */
+.shopify-buy__product__title {
+    font-size: 14px; /* Schriftgröße des Titels */
+    font-weight: bold; /* Fettgedruckter Text */
+    color: #333333; /* Dunkelgraue Schriftfarbe */
+    text-align: left; /* Linksbündiger Text */
+    margin-bottom: 10px; /* Abstand unterhalb des Titels */
+}
+
+/* Produktpreis */
+.shopify-buy__product__price {
+    font-size: 14px; /* Schriftgröße des Preises */
+    color: #666666; /* Mittlere Graustufe für den Preis */
+    text-align: left; /* Linksbündiger Text */
+    margin-bottom: 20px; /* Abstand unterhalb des Preises */
+}
+
+/* "Shto në shportë" (In den Warenkorb) Button */
+.shopify-buy__btn {
+    width: 100%; /* Button nimmt die volle Breite ein */
+    background-color: #000000; /* Schwarzer Hintergrund */
+    color: #ffffff; /* Weiße Schriftfarbe */
+    padding: 15px; /* Innenabstand im Button */
+    font-size: 14px; /* Schriftgröße des Buttons */
     font-weight: bold;
-    color: #000000;
-    margin-bottom: 5px; /* Platz nach unten */
+    text-transform: uppercase; /* Großbuchstaben */
+    border: none; /* Kein Rahmen */
+    border-radius: 5px; /* Abgerundete Ecken */
+    cursor: pointer; /* Zeiger-Cursor beim Hover */
 }
 
-.product-price {
-    text-align: left; /* Links ausgerichtet */
-    font-size: 16px;
-    color: #333333;
-    margin-bottom: 10px; /* Platz nach unten */
+.shopify-buy__btn:hover {
+    background-color: #333333; /* Dunkleres Grau beim Hover */
 }
 
-.product-description {
-    text-align: left; /* Links ausgerichtet */
+.shopify-buy__btn:focus {
+    outline: none; /* Entfernt den Standardfokusrahmen */
+    background-color: #333333; /* Dunkleres Grau beim Fokus */
+}
+
+
+
+
+
+
+
+
+/* === Produkt-Stile === */
+
+.product-item {
+    width: 100%;
+
+    margin-bottom: 40px;
+    padding: 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background-color: #ffffff;
+
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Produktbild */
+
+.shopify-buy__product__image-wrapper {
+    text-align: center;
+    margin-bottom: 15px !important;
+}
+
+.shopify-buy__product__image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px !important;
+}
+
+/* Produkttitel */
+
+.shopify-buy__product__title {
+    font-size: 20px !important;
+    color: #333333 !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    margin-bottom: 10px !important;
+}
+
+/* "Made in Germany" */
+
+.made-in {
     font-size: 14px;
-    color: #666666;
-    margin-bottom: 10px; /* Platz nach unten */
+    color: #777777;
+    text-align: left;
+    margin-bottom: 5px;
 }
+
+/* Produktgröße ("30mL") */
+
+.product-size {
+    font-size: 14px;
+    color: #777777;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+/* "Add to Cart" Button */
+
+.shopify-buy__btn {
+    width: 100% !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    padding: 15px !important;
+    font-size: 16px !important;
+    font-weight: normal !important; /* Nicht fettgedruckt */
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    text-transform: none !important; /* Keine Großbuchstaben */
+}
+
+.shopify-buy__btn:hover {
+    background-color: #333333 !important;
+}
+
+.shopify-buy__btn:focus {
+    outline: none !important;
+    background-color: #000000 !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Definieren Sie eine Klasse für den Abstand */
+.spacing-adjustable {
+    margin-top: var(--spacing-between-image-and-title, 20px); /* Standardwert ist 15px */
+}
+
+
+
+/* Übergeordneter Container */
+.products-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+
+
 
