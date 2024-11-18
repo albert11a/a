@@ -459,15 +459,16 @@ button {
 /* Zeilen */
 .row {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     width: 100%;
-    max-width: 500px;
     gap: 15px;
 }
 
 /* Einzelne Ergebnisboxen */
 .result-box {
-    flex: 1;
+    flex: 1 1 33.33%; /* 3 pro Reihe, proportional anpassbar */
+    max-width: calc(33.33% - 20px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -510,8 +511,8 @@ button {
 .progress-circle::after {
     content: '';
     position: absolute;
-    width: 80px; /* Größe des inneren weißen Kreises */
-    height: 80px;
+    width: 80%; /* Größe des inneren weißen Kreises proportional zur Größe des Fortschrittskreises */
+    height: 80%;
     background-color: #ffffff;
     border-radius: 50%;
     z-index: 1;
@@ -538,7 +539,7 @@ button {
 /* Linearer Fortschrittsbalken für Elasticiteti und Barriera */
 .progress-bar {
     position: relative;
-    width: 90px;
+    width: 100%; /* Proportional zur umgebenden Box */
     height: 15px;
     border-radius: 10px;
     background-color: #F6F6F7;
@@ -571,8 +572,8 @@ small {
         height: 70px;
     }
     .progress-circle::after {
-        width: 55px;
-        height: 55px;
+        width: 80%;
+        height: 80%;
     }
     .row {
         gap: 10px;
@@ -581,9 +582,38 @@ small {
         font-size: 0.8rem;
     }
     .progress-bar {
-        width: 70px;
+        width: 80%;
         height: 10px;
     }
+    .result-box {
+        flex: 1 1 calc(33.33% - 10px); /* 3 pro Reihe auch auf kleinen Bildschirmen, mit kleinerem Abstand */
+        max-width: calc(33.33% - 10px);
+    }
+}
+
+/* Neue Zeile für Status-Texte */
+.status-text-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    gap: 15px;
+    padding: 20px;
+    border: 1px solid #e5e5e5; /* Hellgrauer Rand */
+    border-radius: 10px; /* Abgerundete Ecken */
+    background-color: #ffffff; /* Weißer Hintergrund */
+    box-sizing: border-box;
+}
+
+/* Einzelne Status-Texte */
+.status-text {
+    flex: 1;
+    text-align: center;
+    font-family: "Harmonia Sans", sans-serif;
+    border-radius: 5px; /* Abgerundete Ecken */
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 0.7rem;
 }
 
 
@@ -763,7 +793,8 @@ small {
 
 /* Stil für den Diagnose-Text */
 #diagnosisText {
-    font-size: 1rem;
+    font-size: 0,5rem;
+    font-size: 12px;
     color: #333;
     margin: 20px 0;
     line-height: 1.6;
@@ -1154,27 +1185,3 @@ input[type="text"] {
 
 
 
-
-/* Stil für die Anleitungsbox */
-.instruction-box {
-    border: 2px solid #000000; /* Blaue Umrandung */
-    padding: 10px;
-    margin-top: 10px;
-    background-color: #f9f9f9; /* Hellgrauer Hintergrund */
-    border-radius: 5px; /* Abgerundete Ecken */
-}
-
-/* Stil für den Anleitungsinhalt */
-.instruction-box p {
-    margin: 0;
-    font-size: 12px;
-    color: #555;
-}
-
-/* Responsive Design für die Anleitungsbox */
-@media (max-width: 600px) {
-    .instruction-box {
-        font-size: 12px;
-        padding: 8px;
-    }
-}
