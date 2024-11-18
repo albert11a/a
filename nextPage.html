@@ -46,18 +46,18 @@
             <p>Emri: <span id="userName"></span></p> 
             <p>Mosha: <span id="userAge"></span></p>
         </div>
-
+<br>
         <div class="question-box">
             <h3>Diagnoza Juaj</h3>
             <h6 id="diagnosisText"></h6>
         </div>
     </div>
-
+<br>
     <!-- Kreisdiagramme -->
     <div class="result-container">
         <div class="row">
             <div class="result-box">
-                <div class="label">Shëndeti i Lëkurës</div>
+                <div class="label">Shëndeti</div>
                 <div class="progress-circle" data-category="shendeti" data-percentage="50"></div>
             </div>
             <div class="result-box">
@@ -83,6 +83,20 @@
                 <div class="progress-circle" data-category="akne" data-percentage="70"></div>
             </div>
         </div>
+
+<!-- Neue Zeile mit Status-Texten -->
+<div class="status-text-row">
+    <div class="status-text nevoitet-kujdes">
+        0%-40% Kujdes
+    </div>
+    <div class="status-text normal">
+        50%-70% Normal
+    </div>
+    <div class="status-text shume-mire">
+        80%-100% Mire
+    </div>
+</div>
+
         <div class="row">
             <div class="result-box">
                 <div class="label">Elasticiteti i Lëkurës Suaj</div>
@@ -96,8 +110,13 @@
             </div>
         </div>
     </div>
-
-
+<br>
+<br>
+    <div class="answer-box diagnosis-box">
+        <p>Emri: <span id="userName"></span></p> 
+        <p>Mosha: <span id="userAge"></span></p>
+    </div>
+<br>
     <div id="products-container" class="products-container">
         <!-- Produktempfehlungen werden hier eingefügt -->
         
