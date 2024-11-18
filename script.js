@@ -988,10 +988,7 @@ function finishQuestionnaire() {
     // Abrufen des aufgenommenen Fotos aus dem localStorage
     const photoData = localStorage.getItem('capturedImage');
 
-    if (!photoData) {
-        alert('Asnjë foto nuk u gjet. Ju lutem filloni pyetësorin nga fillimi.'); // "Kein Foto gefunden. Bitte starten Sie den Fragebogen neu."
-        return;
-    }
+
 
     console.log('Der Fragebogen wurde abgeschlossen. Gesammelte Daten:', userResponses);
 
@@ -1036,10 +1033,10 @@ function generateDiagnosis(userResponses) {
      * Konfiguration der spezifischen Hautprobleme und deren Wertbereiche.
      */
     const problemsConfig = {
-        'Akne': { selected: false, selectedRange: [11, 37], defaultRange: [52, 69] },
+        'Akne': { selected: false, selectedRange: [11, 37], defaultRange: [90, 99] },
         'Poret': { selected: false, selectedRange: [14, 28], defaultRange: [52, 69] },
-        'Hiperpigmentim': { selected: false, selectedRange: [14, 34], defaultRange: [52, 69] },
-        'Rrudhat': { selected: false, selectedRange: [24, 39], defaultRange: [52, 69] }
+        'Hiperpigmentim': { selected: false, selectedRange: [14, 34], defaultRange: [89, 98] },
+        'Rrudhat': { selected: false, selectedRange: [24, 39], defaultRange: [95, 99] }
     };
 
     // Überprüfen, welche Probleme ausgewählt wurden und entsprechend markieren
@@ -1087,41 +1084,22 @@ function generateDiagnosis(userResponses) {
      */
     let diagnosisText = '';
 
-    // Integration des ausgewählten Hauttyps in den Diagnose-Text
-    if (userResponses['question2'] && userResponses['question2'].length > 0) {
-        const skinType = userResponses['question2'][0];
-        switch (skinType) {
-            case 'Thate':
-                diagnosisText += 'Sebumi i lëkurës tuaj është i thatë. '; // "Ihre Haut ist trocken."
-                break;
-            case 'Yndyrshme':
-                diagnosisText += 'Sebumi i lëkurës tuaj është i yndyrshëm. '; // "Ihre Haut ist ölig."
-                break;
-            case 'Kombinuar':
-                diagnosisText += 'Sebumi i lëkurës tuaj është i kombinuar. '; // "Ihre Haut ist kombiniert."
-                break;
-            case 'Normale':
-                diagnosisText += 'Sebumi i lëkurës tuaj është normale. '; // "Ihre Haut ist normal."
-                break;
-            default:
-                diagnosisText += 'Sebumi i lëkurës tuaj është në gjendje të mirë. '; // "Ihre Haut ist in gutem Zustand."
-        }
-    }
+
 
     // Integration der ausgewählten Problemstellungen in den Diagnose-Text
     if (userResponses['question3'] && userResponses['question3'].length > 0) {
-        diagnosisText += 'Pas analizës, kemi vërejtur se keni problemet e mëposhtme: '; // "Nach der Analyse haben wir festgestellt, dass Sie folgende Probleme haben:"
+        diagnosisText += 'Gjatë skanimit të lëkurës tuaj, kemi vërejtur se keni disa shqetësime lidhur me '; // "Nach der Analyse haben wir festgestellt, dass Sie folgende Probleme haben:"
         diagnosisText += userResponses['question3'].join(', ').toLowerCase() + '. '; // Auflistung der Probleme
 
         // Auswahl einer zufälligen Diagnosevariante aus einem Array von Optionen
         const diagnosisVariants = [
-            'Kemi identifikuar këto probleme si rezultat të faktorëve të ndryshëm të jetës së përditshme dhe ambientit. ',
+            'këto probleme si rezultat të faktorëve të ndryshëm të jetës së përditshme dhe ambientit. ',
             'Këto probleme mund të shkaktohen nga stresi, ushqimi, dhe mungesa e kujdesit adekuat të lëkurës. ',
             'Analiza jonë tregon që këto çështje kërkojnë vëmendje dhe mirëmbajtje të vazhdueshme. ',
             'Këto problematika janë shpesh rezultat i përdorimit të duhur të produkteve për kujdesin e lëkurës. ',
             'Faktorët gjenetikë dhe mjedisorë luajnë një rol të rëndësishëm në shfaqjen e këtyre problemeve. ',
             'Këto probleme shpesh lidhen me mungesën e hidratimit adekuat dhe ekspozimin ndaj faktorëve të jashtëm. ',
-            'Shëndeti i përgjithshëm dhe dieta juaj kanë një ndikim të madh në gjendjen e lëkurës. ',
+            'Shëndeti i përgjithshëm juaj ka një ndikim të madh në gjendjen e lëkurës. ',
             'Nivelet e lartë të stresit dhe jetesa në mjedise të ndotura mund të kontribuojnë në këto çështje. ',
             'Mungesa e gjumit të mjaftueshëm dhe aktiviteti fizik i pamjaftueshëm mund të ndikojnë negativisht në shëndetin e lëkurës. ',
             'Produktet e tepërt për kujdesin e lëkurës mund të çojnë në irritim dhe probleme të tjera. '
