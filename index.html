@@ -14,6 +14,14 @@
     <script src="https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js"></script>
     <!-- JavaScript -->
     <script defer src="script.js"></script>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RY12JD3F64"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RY12JD3F64');
+</script>
 </head>
 <body>
 
@@ -28,16 +36,17 @@
 
     <!-- Container für Fragen und Antworten -->
     <div id="question-container">
-
-        <!-- Frage 1: Selfie -->
+       
+       <!-- Frage 1: Selfie -->
         <div class="question-box" id="question1">
+            <br>
             <h3>Skanimi i Lëkurës</h3>
-            <h6>Ju lutemi, skanoni fytyrën tuaj për një analizë të detajuar</h6>
-            <h6><strong>Instruksioni:</strong> Kliko më poshtë te butoni për të filluar skanimin</h6>
+            <h6>Ju lutemi, skanoni fytyrën për analizë. Klikoni te butoni 'Fillo analizën' dhe pranoni kamerën për të vazhduar.</h6>
         </div>
+       
         
         <div id="answers1" class="">
-            <button class="instruction-button" onclick="openCamera()">Bëni Skanimin këtu</button>
+            <button class="instruction-button" onclick="openCamera()">Fillo Skanimin</button>
         </div>
         
         <!-- Navigationsschaltflächen für Frage 1 -->
@@ -45,12 +54,15 @@
             <!-- Kein "Weiter"-Button erforderlich, da automatisch zur nächsten Frage gewechselt wird -->
         </div>
 
+
         <!-- Frage 2: Hauttyp -->
         <div class="question-box" id="question2" style="display: none;">
             <br>
             <h3>Tipi i Lëkurës</h3>
-            <h6>Mund të përshkruani llojin e lëkurës suaj?</h6>
+            <h6>Mund ta përshkruani llojin e lëkurës suaj? Zgjidhni një opsion duke klikuar mbi të dhe pastaj klikoni te 'Vazhdo'.</h6>
         </div>
+
+
 
         <!-- Navigationsschaltflächen für Frage 2 -->
         <div class="nav-buttons" id="nav-buttons2" style="display: none;">
@@ -87,7 +99,7 @@
         <div class="question-box" id="question3" style="display: none;">
             <br>
             <h3>Problematikat</h3>
-            <h6>Ju lutem specifikoni problemet e lëkurës tuaj</h6>
+            <h6>Ju lutemi, specifikoni problemet e lëkurës tuaj duke zgjedhur një ose më shumë opsione dhe pastaj klikoni te 'Vazhdo'.</h6>
         </div>
 
         <!-- Navigationsschaltflächen für Frage 3 -->
@@ -125,7 +137,7 @@
         <div class="question-box" id="question4" style="display: none;">
             <br>
             <h3>Sensitiviteti</h3>
-            <h6>Sa është lëkura juaj sensitive?</h6>
+            <h6>Sa është ndjeshmëria e lëkurës suaj? Nga 1 deri në 10, lëvizni rregullatorin për ta përcaktuar dhe pastaj klikoni te 'Vazhdo'.</h6>
         </div>
 
         <!-- Antwortoptionen für Frage 4 -->
@@ -146,7 +158,7 @@
         <div class="question-box" id="question5" style="display: none;">
             <br>
             <h3>Emri</h3>
-            <h6>Si quheni ju lutemi?</h6>
+            <h6>Si quheni, ju lutemi? Kjo ndihmon për të mos u përzier analizat e lëkurës.</h6>
         </div>
 
         <!-- Antwortoptionen für Frage 5 (Name) -->
@@ -166,7 +178,7 @@
         <div class="question-box" id="question6" style="display: none;">
             <br>
             <h3>Mosha</h3>
-            <h6>Sa vjeç jeni?</h6>
+            <h6>Sa vjeç jeni? Ju lutemi, shkruani moshën tuaj (p.sh. 25) dhe klikoni te 'Vazhdo'.</h6>
         </div>
 
         <!-- Antwortoptionen für Frage 6 (Alter) -->
