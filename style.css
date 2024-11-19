@@ -1185,3 +1185,38 @@ input[type="text"] {
 
 
 
+        /* Stil für das Bild ohne Box und die darunterhängende Box */
+        .image-only {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px 10px 0 0;
+            object-fit: cover;
+            margin: 20px auto 0;
+            display: block;
+        }
+
+        .box-below-image {
+            background-color: #F6F6F7;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: "Harmonia Sans", sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            text-align: left;
+            min-height: 150px;
+            margin-bottom: 20px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+                /* Übernahme der Schriftart für h6 aus #diagnosis-container in box-below-image */
+                .box-below-image h6 {
+                    font-size: 0.9rem;
+                    font-weight: 400;
+                    color: #555;
+                    line-height: 1.6;
+                }
