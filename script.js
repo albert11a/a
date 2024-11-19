@@ -56,8 +56,8 @@ const productRecommendations = {
         id: '8056262557916',
         description: 'Kontrollon dhe minimizon madhësinë e poreve.',
         purpose: 'Zvogëlon poret e dukshme dhe lëmon lëkurën.',
-        activeIngredients: 'Acidi Salicilik, Niacinamid',
-        usage: 'Aplikojeni në mëngjes dhe në mbrëmje pas pastrimit.'
+        activeIngredients: 'Lipo-hydroxy',
+        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
     },
     'Hiperpigmentim': {
         name: 'Vitac',
@@ -65,8 +65,8 @@ const productRecommendations = {
         id: '8050211684572',
         description: 'Trajton hiperpigmentimin dhe tonin e pabarabartë të lëkurës.',
         purpose: 'Lëkurë më e ndritshme dhe strukturë e përmirësuar e lëkurës.',
-        activeIngredients: 'Vitamina C, Retinol',
-        usage: 'Aplikojeni çdo ditë pas pastrimit në zonat e prekura.'
+        activeIngredients: 'Molekular Vitamin c',
+        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
     },
     'Rrudhat': {
         name: 'Reti',
@@ -74,17 +74,17 @@ const productRecommendations = {
         id: '8050211455196',
         description: 'Kujdeset për lëkurën e ndjeshme dhe redukton skuqjen.',
         purpose: 'Qetëson lëkurën dhe zvogëlon skuqjen.',
-        activeIngredients: 'Aloe Vera, Ekstrakt Kamomili',
-        usage: 'Aplikojeni butësisht në lëkurën e pastruar.'
+        activeIngredients: 'Retinol 1%',
+        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
     },
     'Mirembajtje': {
         name: 'Hydro Cleanser',
         price: 15.99,
         id: '8050211127516',
-        description: 'Hidraton dhe pastron lëkurën në thellësi.',
+        description: 'Hidraton dhe pastron lëkurën në thellësi si dhe miremban ate.',
         purpose: 'I jep lëkurës lagështi dhe heq papastërtitë.',
         activeIngredients: 'Acid Hialuronik, Glicerinë',
-        usage: 'Përzieni një sasi të vogël me ujë dhe pastroni fytyrën butësisht.'
+        usage: 'Për të gjitha gjinjtë, është e zakonshme të përdoret kujdesi ndaj fytyrës dhe trupit Njafton një sasi të vogël të kremit në dorën tënde dhe apliko atë në pjesët e fytyrës ose trupit Përdorimin ne detaje e keni me një udhëzues brenda pakos, ku tregon saktë se si përdoret.'
     }
 };
 
