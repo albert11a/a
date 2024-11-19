@@ -1159,11 +1159,11 @@ function displayDiagnosis() {
     if (diagnosisTextElement) {
         diagnosisTextElement.textContent = diagnosisData.diagnosisText;
         diagnosisTextElement.style.textAlign = 'left'; // Links ausrichten
-        diagnosisTextElement.style.fontSize = '1rem';
+        diagnosisTextElement.style.fontSize = '0.9rem';
         diagnosisTextElement.style.color = '#333';
-        diagnosisTextElement.style.margin = '20px';
-        diagnosisTextElement.style.lineHeight = '1.6';
-        diagnosisTextElement.style.fontFamily = '"Harmonia Sans", sans-serif';
+        diagnosisTextElement.style.margin = '14px';
+        diagnosisTextElement.style.lineHeight = '0,9';
+
     }
 
     // Anzeige der Diagrammwerte für 'Shëndeti i Lëkurës' (Hautgesundheit)
