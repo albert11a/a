@@ -181,24 +181,30 @@ function displayProductRecommendations() {
             }
         });
 
-        // Event-Delegation für Tracking ohne Interferenzen
-        document.addEventListener('click', function(event) {
-            if (event.target && event.target.classList.contains('html-add-to-cart')) {
-                const productId = event.target.getAttribute('data-product-id');
-                const productName = event.target.getAttribute('data-product-name');
-                const productPrice = parseFloat(event.target.getAttribute('data-product-price'));
+// Event-Listener für AddToCart
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function () {
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+        const productPrice = parseFloat(button.getAttribute('data-product-price'));
 
-                // Facebook Pixel Event
-                if (typeof fbq === 'function') { // Überprüfen, ob fbq definiert ist
-                    fbq('track', 'AddToCart', {
-                        content_ids: [productId],
-                        content_name: productName,
-                        currency: 'EUR',
-                        value: productPrice
-                    });
-                }
-            }
+        // Facebook Pixel Tracking
+        fbq('track', 'AddToCart', {
+            content_ids: [productId],
+            content_name: productName,
+            currency: 'EUR',
+            value: productPrice
         });
+
+        console.log('AddToCart Pixel gesendet:', {
+            content_ids: [productId],
+            content_name: productName,
+            currency: 'EUR',
+            value: productPrice
+        });
+    });
+});
+
 
         // Iterieren über die ausgewählten Probleme
         selectedProblems.forEach((problem, index) => {
